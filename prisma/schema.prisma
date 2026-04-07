@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")  
+}
+
+model Client {
+  id           Int            @id @default(autoincrement())
+  email        String         @unique
+  nome         String
+  criado_em    DateTime       @default(now())
+  cpf          String         @unique  
+  telefone     String
+  assinaturas  Assinaturas[]
+}
+
+model Plano {
+  id            Int            @id @default(autoincrement())
+  nome          String
+  preco         String
+  criado_em     DateTime       @default(now())
+  atualizado_em DateTime       @updatedAt  
+  assinaturas   Assinaturas[]
+}
+
+model Assinaturas {
+  id                     Int        @id @default(autoincrement())
+  client_id              Int
+  client                 Client     @relation(fields: [client_id], references: [id])
+  plano_id               Int
+  plano                  Plano      @relation(fields: [plano_id], references: [id])
+  status                 Boolean    @default(true)
+  data_inicio            DateTime   @default(now())
+  data_ultimo_pagamento  DateTime?  
+  proximo_vencimento     DateTime
+  criado_em              DateTime   @default(now())
+  atualizado_em          DateTime   @updatedAt
+  pagamentos             Pagamento[] 
+}
+
+model Pagamento {
+  id             Int         @id @default(autoincrement())
+  assinatura_id  Int
+  assinatura     Assinaturas @relation(fields: [assinatura_id], references: [id])
+  valor          Decimal     @db.Decimal(10, 2)  
+  data_pagamento DateTime    @default(now())
+  status         Boolean
+  metodo         String
+  obs            String?   
+  criado_em      DateTime    @default(now())
+}
