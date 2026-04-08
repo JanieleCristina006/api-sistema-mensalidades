@@ -1,10 +1,18 @@
 generator client {
   provider = "prisma-client-js"
 }
-
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")  
+ 
+}
+
+enum PlanStatus {
+ 
+  ACTIVE // Plano ativo e disponível para novos clientes contratarem
+
+  INACTIVE // Plano desativado: não aceita novos clientes, mas mantém os atuais
+
+  ARCHIVED /// Plano arquivado: não aparece mais no sistema e não deve ser usado
 }
 
 model Client {
@@ -19,8 +27,9 @@ model Client {
 
 model Plano {
   id            Int            @id @default(autoincrement())
-  nome          String
+  nome          String         @unique
   preco         String
+  status        PlanStatus @default(ACTIVE)
   criado_em     DateTime       @default(now())
   atualizado_em DateTime       @updatedAt  
   assinaturas   Assinaturas[]

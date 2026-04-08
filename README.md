@@ -39,10 +39,22 @@ npm install
 
 ## Configuracao de ambiente
 
-Crie um arquivo `.env` na raiz do projeto com a conexao do PostgreSQL:
+Crie um arquivo `.env` na raiz do projeto com a conexao do PostgreSQL.
+
+Para a aplicacao, use `DATABASE_URL`.
+Para `prisma migrate`, prefira `DIRECT_URL` quando estiver usando pooler (como Neon):
 
 ```env
-DATABASE_URL="postgresql://usuario:senha@localhost:5432/sistema_mensalidades"
+DATABASE_URL="postgresql://usuario:senha@host-pooler:5432/sistema_mensalidades"
+DIRECT_URL="postgresql://usuario:senha@host-direto:5432/sistema_mensalidades"
+```
+
+No Prisma 7, o `schema.prisma` pode ficar sem `url`, mas o bloco `datasource` continua obrigatorio:
+
+```prisma
+datasource db {
+  provider = "postgresql"
+}
 ```
 
 ## Banco de dados
