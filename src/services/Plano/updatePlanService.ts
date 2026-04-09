@@ -1,15 +1,15 @@
-import { PlanStatus } from '@prisma/client';
+
 import { prisma } from '../../config/prisma';
 
-interface CreatePlanProps {
+interface UpdatePlanProps {
   id: number
   nome: string;
   preco: string;
-  status?: PlanStatus; 
+ 
 }
 
 export class UpdatePlanService {
-  async execute({ nome, preco, status = PlanStatus.ACTIVE,id }: CreatePlanProps) {
+  async execute({ nome, preco, id }: UpdatePlanProps) {
 
     const normalizedName = nome.toLowerCase().trim()
 
@@ -30,7 +30,6 @@ export class UpdatePlanService {
       data: {
         nome: normalizedName,
         preco,
-        status
       }
     })
 

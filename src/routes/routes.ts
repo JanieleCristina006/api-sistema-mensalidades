@@ -1,45 +1,81 @@
 import { Router } from "express";
+
 import { CreateClientController } from "../controller/Cliente/createClientController";
-import { validateSchema } from "../middleware/validateSchema";
-import { clientSchema } from "../schemas/Cliente/createClientSchema";
 import { ListClientController } from "../controller/Cliente/listClientsService";
 import { GetClientByIdController } from "../controller/Cliente/getClientByIdController";
-import { validaId } from "../middleware/validateId";
-import { updatedClientSchema } from "../schemas/Cliente/updateClientSchema";
 import { UpdateClientController } from "../controller/Cliente/updateClientController";
 import { DeleteClientController } from "../controller/Cliente/deleteClienteController";
+
 import { CreatePlanController } from "../controller/Plano/createPlanController";
-import { createPlanoSchema } from "../schemas/Plano/createPlanoSchema";
 import { ListPlanController } from "../controller/Plano/listPlanController";
 import { UpdatePlanController } from "../controller/Plano/updatePlanController";
+import { UpdateStatusPlanController } from "../controller/Plano/updatePlanStatusController";
 
-const router = Router()
+import { validateBody } from "../middleware/validateBody";
+import { validateParams } from "../middleware/validateParams";
 
-// Cadastrar Cliente
-router.post("/cadastrar",validateSchema(clientSchema),new CreateClientController().handle)
+import { clientSchema } from "../schemas/Cliente/createClientSchema";
+import { updatedClientSchema } from "../schemas/Cliente/updateClientSchema";
+import { createPlanoSchema } from "../schemas/Plano/createPlanoSchema";
+import { updatePlanStatusSchema } from "../schemas/Plano/updatePlanStatusSchema";
+import { idSchema } from "../schemas/Global/idSchema";
 
-// Listar Clientes
-router.get("/clientes",new ListClientController().handle )
+const router = Router();
 
-// Listar cliente expecífico
-router.get("/cliente/:id",validaId,new GetClientByIdController().handle)
+// Clientes
+router.post(
+  "/clientes",
+  validateBody(clientSchema),
+  new CreateClientController().handle
+);
 
-// Atualizar Cliente
-router.put("/cliente/:id",validateSchema(updatedClientSchema),new UpdateClientController().handle)
+router.get(
+  "/clientes",
+  new ListClientController().handle
+);
 
-// Deletar Cliente
-router.delete("/cliente/:id",validaId,new DeleteClientController().handle)
+router.get(
+  "/clientes/:id",
+  validateParams(idSchema),
+  new GetClientByIdController().handle
+);
 
+router.put(
+  "/clientes/:id",
+  validateParams(idSchema),
+  validateBody(updatedClientSchema),
+  new UpdateClientController().handle
+);
 
-// Rotas do plano
+router.delete(
+  "/clientes/:id",
+  validateParams(idSchema),
+  new DeleteClientController().handle
+);
 
-// Cadastrar Plano
-router.post("/cadastrar-plano",validateSchema(createPlanoSchema),new CreatePlanController().handle)
+// Planos
+router.post(
+  "/planos",
+  validateBody(createPlanoSchema),
+  new CreatePlanController().handle
+);
 
-// Listar Plano
-router.get("/planos",new ListPlanController().handle)
+router.get(
+  "/planos",
+  new ListPlanController().handle
+);
 
-// Atualizar Plano 
-router.put("/plano/:id",validaId,new UpdatePlanController().handle)
+router.put(
+  "/planos/:id",
+  validateParams(idSchema),
+  new UpdatePlanController().handle
+);
+
+router.patch(
+  "/planos/:id/status",
+  validateParams(idSchema),
+  validateBody(updatePlanStatusSchema),
+  new UpdateStatusPlanController().handle
+);
 
 export default router;

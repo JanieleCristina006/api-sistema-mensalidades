@@ -1,4 +1,3 @@
-import { PlanStatus } from '@prisma/client';
 import { z } from 'zod';
 
 export const createPlanoSchema = z.object({
@@ -10,7 +9,6 @@ export const createPlanoSchema = z.object({
       .string()
       .trim()
       .min(1, 'O preco do plano e obrigatorio'),
-    status: z.nativeEnum(PlanStatus).optional(),
   }),
   query: z.object({}),
   params: z.object({}),
