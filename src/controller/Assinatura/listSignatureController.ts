@@ -1,5 +1,5 @@
 import { Request,Response } from "express";
-import { SignatureService } from "../../services/Assisnatura/listSignatureService";
+import { SignatureService } from "../../services/Assinatura/listSignatureService";
 
 export class ListSignatureController{
     async handle(_req:Request,res:Response){

@@ -1,5 +1,5 @@
 import { Request,Response } from "express";
-import { CreatePlanService } from "../../services/Plano/createPlan";
+import { CreatePlanService } from "../../services/Plano/createPlanService";
 
 export class CreatePlanController{
     async handle(req:Request,res:Response){

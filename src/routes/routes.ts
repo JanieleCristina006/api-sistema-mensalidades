@@ -1,10 +1,10 @@
 import { Router } from "express";
 
 import { CreateClientController } from "../controller/Cliente/createClientController";
-import { ListClientController } from "../controller/Cliente/listClientsService";
+import { ListClientController } from "../controller/Cliente/listClientsController";
 import { GetClientByIdController } from "../controller/Cliente/getClientByIdController";
 import { UpdateClientController } from "../controller/Cliente/updateClientController";
-import { DeleteClientController } from "../controller/Cliente/deleteClienteController";
+import { DeleteClientController } from "../controller/Cliente/deleteClientController";
 
 import { CreatePlanController } from "../controller/Plano/createPlanController";
 import { ListPlanController } from "../controller/Plano/listPlanController";
@@ -16,12 +16,12 @@ import { validateParams } from "../middleware/validateParams";
 
 import { clientSchema } from "../schemas/Cliente/createClientSchema";
 import { updatedClientSchema } from "../schemas/Cliente/updateClientSchema";
-import { createPlanoSchema } from "../schemas/Plano/createPlanoSchema";
+import { createPlanSchema } from "../schemas/Plano/createPlanSchema";
 import { updatePlanStatusSchema } from "../schemas/Plano/updatePlanStatusSchema";
 import { idSchema } from "../schemas/Global/idSchema";
 import { ListSignatureController } from "../controller/Assinatura/listSignatureController";
 import { GetSignatureByIdController } from "../controller/Assinatura/getSignatureByIdController";
-import { CancelSubscriptionController } from "../controller/Assinatura/CancelSubscriptionController";
+import { CancelSubscriptionController } from "../controller/Assinatura/cancelSubscriptionController";
 
 const router = Router();
 
@@ -59,7 +59,7 @@ router.delete(
 // Planos
 router.post(
   "/planos",
-  validateBody(createPlanoSchema),
+  validateBody(createPlanSchema),
   new CreatePlanController().handle
 );
 

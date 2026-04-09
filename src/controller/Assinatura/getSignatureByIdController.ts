@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getSignatureByIdService } from "../../services/Assisnatura/getSignatureByIdService";
+import { getSignatureByIdService } from "../../services/Assinatura/getSignatureByIdService";
 
 export class GetSignatureByIdController {
   async handle(req: Request, res: Response) {

@@ -1,7 +1,7 @@
 import { PlanStatus } from '@prisma/client';
 import { z } from 'zod';
 
-export const createPlanoSchema = z.object({
+export const createPlanSchema = z.object({
  
     nome: z
       .string()

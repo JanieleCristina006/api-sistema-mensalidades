@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { CancelSubscriptionService} from "../../services/Assisnatura/CancelSubscriptionService";
+import { CancelSubscriptionService} from "../../services/Assinatura/cancelSubscriptionService";
 
 export class CancelSubscriptionController {
  

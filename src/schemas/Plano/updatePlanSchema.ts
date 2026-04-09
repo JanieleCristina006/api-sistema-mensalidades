@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const createPlanoSchema = z.object({
+export const updatePlanSchema = z.object({
     nome: z
       .string()
       .min(3, 'O nome do plano precisa ter pelo menos 3 caracteres'),
