@@ -1,15 +1,19 @@
+
 import {prisma} from "../../config/prisma"
+import { addDays } from "date-fns"
+import { PlanStatus } from "@prisma/client"
 
-
-interface createClientProps{
+interface createClientAssinaturaProps{
     email:    string
     nome:     string
     cpf :     string
     telefone: string
+    plano_id: number
+    
 }
 
 export class createClientService{
-    async execute({nome,email,cpf,telefone}:createClientProps){
+    async execute({nome,email,cpf,telefone,plano_id }:createClientAssinaturaProps){
 
         const existEmail = await prisma.client.findUnique({
             where: {
@@ -17,14 +21,31 @@ export class createClientService{
             }
         })
 
-         const existPhone = await prisma.client.findFirst({
+         const existPhone = await prisma.client.findUnique({
            where: {
             telefone: telefone
            }
         })
 
-        if (existEmail && existPhone) {
-            throw new Error("Telefone e email já cadastrado!");
+        const existCPF = await prisma.client.findUnique({
+           where: {
+            cpf: cpf
+           }
+        })
+
+        const existPlan = await prisma.plano.findFirst({
+           where: {
+             id: plano_id,
+             status: PlanStatus.ACTIVE
+           }
+        })
+
+        if(!existPlan){
+            throw new Error("Plano não cadastrado ou inativo/ARCHIVED")
+        }
+
+        if(existCPF){
+            throw new Error("CPF já cadastrado!");
         }
 
         if (existEmail) {
@@ -35,18 +56,29 @@ export class createClientService{
             throw new Error("Telefone já cadastrado!");
         }
 
-        const createClient = await prisma.client.create({
-            data:{
-                nome: nome,
-                email:email,
-                cpf: cpf,
-                telefone:telefone
-            },
-            include:{
-                assinaturas: true
-            }
+        const createClientAssinatura = await prisma.$transaction(async (tx)=>{
+            const createClient = await tx.client.create({
+                data:{
+                  nome: nome,
+                  email:email,
+                  cpf: cpf,
+                  telefone:telefone
+                },
+                
+            })
+
+            const createAssinatura = await tx.assinatura.create({
+                data:{
+                    plano_id: plano_id,
+                    client_id:createClient.id ,
+                    proximo_vencimento: addDays(new Date(),30)
+                }
+            })
+
+            return {createClient,createAssinatura}
         })
 
-        return createClient;
+
+        return createClientAssinatura;
     }
 }

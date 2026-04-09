@@ -15,33 +15,45 @@ enum PlanStatus {
   ARCHIVED /// Plano arquivado: não aparece mais no sistema e não deve ser usado
 }
 
+enum SignatureStatus {
+  ACTIVE // Assinatura ativa 
+  CANCELLED // Assinatura CANCELADA
+}
+
+enum PaymentStatus {
+  PAGO  
+  PENDENTE 
+  FALHOU
+  ESTORNADO
+}
+
 model Client {
   id           Int            @id @default(autoincrement())
   email        String         @unique
   nome         String
   criado_em    DateTime       @default(now())
   cpf          String         @unique  
-  telefone     String
-  assinaturas  Assinaturas[]
+  telefone     String         @unique
+  assinaturas  Assinatura[]
 }
 
 model Plano {
   id            Int            @id @default(autoincrement())
   nome          String         @unique
-  preco         String
+  preco         Decimal               @db.Decimal(10, 2) 
   status        PlanStatus @default(ACTIVE)
   criado_em     DateTime       @default(now())
   atualizado_em DateTime       @updatedAt  
-  assinaturas   Assinaturas[]
+  assinaturas   Assinatura[]
 }
 
-model Assinaturas {
+model Assinatura {
   id                     Int        @id @default(autoincrement())
   client_id              Int
   client                 Client     @relation(fields: [client_id], references: [id])
   plano_id               Int
   plano                  Plano      @relation(fields: [plano_id], references: [id])
-  status                 Boolean    @default(true)
+  status                 SignatureStatus    @default(ACTIVE)
   data_inicio            DateTime   @default(now())
   data_ultimo_pagamento  DateTime?  
   proximo_vencimento     DateTime
@@ -53,10 +65,9 @@ model Assinaturas {
 model Pagamento {
   id             Int         @id @default(autoincrement())
   assinatura_id  Int
-  assinatura     Assinaturas @relation(fields: [assinatura_id], references: [id])
+  assinatura     Assinatura @relation(fields: [assinatura_id], references: [id])
   valor          Decimal     @db.Decimal(10, 2)  
-  data_pagamento DateTime    @default(now())
-  status         Boolean
+  status         PaymentStatus  @default(PENDENTE)
   metodo         String
   obs            String?   
   criado_em      DateTime    @default(now())
