@@ -62,7 +62,7 @@ export class createClientService{
                   nome: nome,
                   email:email,
                   cpf: cpf,
-                  telefone:telefone
+                  telefone:telefone,
                 },
                 
             })

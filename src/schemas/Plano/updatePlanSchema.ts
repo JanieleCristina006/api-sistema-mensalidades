@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 export const createPlanoSchema = z.object({
-  body: z.object({
     nome: z
       .string()
       .min(3, 'O nome do plano precisa ter pelo menos 3 caracteres'),
@@ -9,7 +8,5 @@ export const createPlanoSchema = z.object({
       .string()
       .trim()
       .min(1, 'O preco do plano e obrigatorio'),
-  }),
-  query: z.object({}),
-  params: z.object({}),
+
 });

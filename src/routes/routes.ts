@@ -19,6 +19,9 @@ import { updatedClientSchema } from "../schemas/Cliente/updateClientSchema";
 import { createPlanoSchema } from "../schemas/Plano/createPlanoSchema";
 import { updatePlanStatusSchema } from "../schemas/Plano/updatePlanStatusSchema";
 import { idSchema } from "../schemas/Global/idSchema";
+import { ListSignatureController } from "../controller/Assinatura/listSignatureController";
+import { GetSignatureByIdController } from "../controller/Assinatura/getSignatureByIdController";
+import { CancelSubscriptionController } from "../controller/Assinatura/CancelSubscriptionController";
 
 const router = Router();
 
@@ -77,5 +80,23 @@ router.patch(
   validateBody(updatePlanStatusSchema),
   new UpdateStatusPlanController().handle
 );
+
+// Assinaturas
+router.get(
+  "/assinaturas",
+  new ListSignatureController().handle
+)
+
+router.get(
+  "/assinaturas/:id",
+  validateParams(idSchema),
+  new GetSignatureByIdController().handle
+)
+
+router.post(
+  "/assinaturas/:id",
+  validateParams(idSchema),
+  new CancelSubscriptionController().handle
+)
 
 export default router;
