@@ -1,16 +1,16 @@
-import { Request, Response } from 'express';
-import { ListPlanService } from '../../services/Plano/listPlanService';
+import { Request, Response } from "express";
+import { ListPlanService } from "../../services/Plano/listPlanService";
 
 export class ListPlanController {
   async handle(_req: Request, res: Response) {
-    const service = new ListPlanService();
+    const listPlanService = new ListPlanService();
 
-    const data = await service.execute();
+    const planList = await listPlanService.execute();
 
-    if (!data) {
-      throw new Error('Erro ao buscar lista de planos');
+    if (!planList) {
+      throw new Error("Nenhum plano encontrado");
     }
 
-    res.status(200).json(data);
+    res.status(200).json(planList);
   }
 }

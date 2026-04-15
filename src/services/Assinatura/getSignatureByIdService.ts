@@ -1,20 +1,17 @@
-import {prisma} from "../../config/prisma";
+import { prisma } from "../../config/prisma";
 
-export class getSignatureByIdService{
+export class GetSignatureByIdService {
+  async execute(subscriptionId: number) {
+    const subscription = prisma.assinatura.findUnique({
+      where: {
+        id: subscriptionId,
+      },
+    });
 
-    async execute(id_assinatura:number){
-        
-        const existSignature = prisma.assinatura.findUnique({
-            where:{
-                id: id_assinatura
-            }
-        })
-
-        if(!existSignature){
-            throw new Error("Assinatura não encontrada!")
-        }
-
-        return existSignature;
-
+    if (!subscription) {
+      throw new Error("Assinatura nÃ£o encontrada!");
     }
+
+    return subscription;
+  }
 }

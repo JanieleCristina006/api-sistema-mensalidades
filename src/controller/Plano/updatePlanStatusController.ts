@@ -1,18 +1,18 @@
 import { Request, Response } from "express";
-import { UpdateStatusPlanService } from "../../services/Plano/updatePlanStatusService";
+import { UpdatePlanStatusService } from "../../services/Plano/updatePlanStatusService";
 
-export class UpdateStatusPlanController {
+export class UpdatePlanStatusController {
   async handle(req: Request, res: Response) {
     const id = Number(req.params.id);
-    const { status } = req.body
+    const { status } = req.body;
 
-    const service = new UpdateStatusPlanService();
+    const updatePlanStatusService = new UpdatePlanStatusService();
 
-    const data = await service.execute({status,id});
+    const updatedPlanStatus = await updatePlanStatusService.execute({ status, id });
 
     return res.status(200).json({
       message: "O status do plano foi atualizado com sucesso!",
-      data,
-  });
+      data: updatedPlanStatus,
+    });
   }
 }

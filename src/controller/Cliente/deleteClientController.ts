@@ -5,16 +5,16 @@ export class DeleteClientController {
   async handle(req: Request, res: Response) {
     const id = Number(req.params.id);
 
-    const service = new DeleteClientService();
+    const deleteClientService = new DeleteClientService();
 
-    const data = await service.execute(id);
+    const deletedClient = await deleteClientService.execute(id);
 
-    if (!data) {
-      throw new Error("Cliente não encontrado");
+    if (!deletedClient) {
+      throw new Error("Cliente nÃ£o encontrado");
     }
 
     return res.status(200).json({
-        message: "Cliente excluído com sucesso!"
+      message: "Cliente excluído com sucesso!",
     });
   }
 }

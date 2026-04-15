@@ -1,74 +1,81 @@
 generator client {
   provider = "prisma-client-js"
 }
+
 datasource db {
   provider = "postgresql"
- 
 }
 
 enum PlanStatus {
- 
-  ACTIVE // Plano ativo e disponível para novos clientes contratarem
-
-  INACTIVE // Plano desativado: não aceita novos clientes, mas mantém os atuais
-
-  ARCHIVED /// Plano arquivado: não aparece mais no sistema e não deve ser usado
+  ACTIVE
+  INACTIVE
+  ARCHIVED
 }
 
 enum SignatureStatus {
-  ACTIVE // Assinatura ativa 
-  CANCELLED // Assinatura CANCELADA
+  ACTIVE
+  CANCELLED
+  OVERDUE
 }
 
 enum PaymentStatus {
-  PAGO  
-  PENDENTE 
-  FALHOU
-  ESTORNADO
+  PAID
+  PENDING
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  PIX
+  CREDIT_CARD
 }
 
 model Client {
-  id           Int            @id @default(autoincrement())
-  email        String         @unique
-  nome         String
-  criado_em    DateTime       @default(now())
-  cpf          String         @unique  
-  telefone     String         @unique
-  assinaturas  Assinatura[]
+  id          Int           @id @default(autoincrement())
+  email       String        @unique
+  nome        String
+  criado_em   DateTime      @default(now())
+  cpf         String        @unique
+  telefone    String        @unique
+  assinaturas Assinatura[]
 }
 
 model Plano {
-  id            Int            @id @default(autoincrement())
-  nome          String         @unique
-  preco         Decimal               @db.Decimal(10, 2) 
-  status        PlanStatus @default(ACTIVE)
-  criado_em     DateTime       @default(now())
-  atualizado_em DateTime       @updatedAt  
+  id            Int          @id @default(autoincrement())
+  nome          String       @unique
+  preco         Decimal      @db.Decimal(10, 2)
+  status        PlanStatus   @default(ACTIVE)
+  criado_em     DateTime     @default(now())
+  atualizado_em DateTime     @updatedAt
   assinaturas   Assinatura[]
 }
 
 model Assinatura {
-  id                     Int        @id @default(autoincrement())
-  client_id              Int
-  client                 Client     @relation(fields: [client_id], references: [id])
-  plano_id               Int
-  plano                  Plano      @relation(fields: [plano_id], references: [id])
-  status                 SignatureStatus    @default(ACTIVE)
-  data_inicio            DateTime   @default(now())
-  data_ultimo_pagamento  DateTime?  
-  proximo_vencimento     DateTime
-  criado_em              DateTime   @default(now())
-  atualizado_em          DateTime   @updatedAt
-  pagamentos             Pagamento[] 
+  id                    Int              @id @default(autoincrement())
+  client_id             Int
+  client                Client           @relation(fields: [client_id], references: [id])
+  plano_id              Int
+  plano                 Plano            @relation(fields: [plano_id], references: [id])
+  status                SignatureStatus  @default(ACTIVE)
+  data_inicio           DateTime         @default(now())
+  data_ultimo_pagamento DateTime?
+  proximo_vencimento    DateTime
+  criado_em             DateTime         @default(now())
+  atualizado_em         DateTime         @updatedAt
+  pagamentos            Pagamento[]
 }
 
 model Pagamento {
-  id             Int         @id @default(autoincrement())
+  id             Int            @id @default(autoincrement())
   assinatura_id  Int
-  assinatura     Assinatura @relation(fields: [assinatura_id], references: [id])
-  valor          Decimal     @db.Decimal(10, 2)  
-  status         PaymentStatus  @default(PENDENTE)
-  metodo         String
-  obs            String?   
-  criado_em      DateTime    @default(now())
+  assinatura     Assinatura     @relation(fields: [assinatura_id], references: [id])
+  valor          Decimal        @db.Decimal(10, 2)
+  status         PaymentStatus  @default(PENDING)
+  metodo         PaymentMethod
+  referencia_mes Int
+  referencia_ano Int
+  obs            String?
+  criado_em      DateTime       @default(now())
+
+  @@unique([assinatura_id, referencia_mes, referencia_ano])
 }

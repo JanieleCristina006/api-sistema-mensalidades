@@ -1,36 +1,32 @@
-import { PlanStatus } from '@prisma/client';
-import { prisma } from '../../config/prisma';
+import { PlanStatus } from "@prisma/client";
+import { prisma } from "../../config/prisma";
 
 interface UpdateStatusPlanProps {
-  status: PlanStatus
-  id: number
+  status: PlanStatus;
+  id: number;
 }
 
-export class UpdateStatusPlanService {
-  async execute({ id,status }: UpdateStatusPlanProps) {
+export class UpdatePlanStatusService {
+  async execute({ id, status }: UpdateStatusPlanProps) {
+    const existingPlan = await prisma.plano.findUnique({
+      where: {
+        id,
+      },
+    });
 
-
-    const existPlan = await prisma.plano.findUnique({
-        where:{
-            id: id
-        }
-    })
-
-    if(!existPlan){
-        throw new Error("Plano não encontrado!")
+    if (!existingPlan) {
+      throw new Error("Plano nÃ£o encontrado!");
     }
 
-    const updateStatusPlan = await prisma.plano.update({
-      where:{
-       id:id
+    const updatedPlanStatus = await prisma.plano.update({
+      where: {
+        id,
       },
       data: {
-        status: status
-      }
-    })
+        status,
+      },
+    });
 
-    return updateStatusPlan;
+    return updatedPlanStatus;
   }
 }
-
-

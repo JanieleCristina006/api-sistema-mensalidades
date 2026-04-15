@@ -1,17 +1,16 @@
-import { Request,Response } from "express";
-import { SignatureService } from "../../services/Assinatura/listSignatureService";
+import { Request, Response } from "express";
+import { ListSignatureService } from "../../services/Assinatura/listSignatureService";
 
-export class ListSignatureController{
-    async handle(_req:Request,res:Response){
+export class ListSignatureController {
+  async handle(_req: Request, res: Response) {
+    const listSignatureService = new ListSignatureService();
 
-        const service = new SignatureService()
+    const subscriptionList = await listSignatureService.execute();
 
-        const data = await service.execute()
-
-        if(!data){
-            throw new Error("Erro ao buscar assinaturas")
-        }
-
-        res.status(200).json(data)
+    if (!subscriptionList) {
+      throw new Error("Erro ao buscar assinaturas");
     }
+
+    res.status(200).json(subscriptionList);
+  }
 }

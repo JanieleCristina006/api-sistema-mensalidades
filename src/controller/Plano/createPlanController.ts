@@ -1,18 +1,18 @@
-import { Request,Response } from "express";
+import { Request, Response } from "express";
 import { CreatePlanService } from "../../services/Plano/createPlanService";
 
-export class CreatePlanController{
-    async handle(req:Request,res:Response){
-        const { nome,preco,status} = req.body
+export class CreatePlanController {
+  async handle(req: Request, res: Response) {
+    const { nome, preco, status } = req.body;
 
-        const service = new CreatePlanService()
+    const createPlanService = new CreatePlanService();
 
-        const data = await service.execute({nome,preco,status})
+    const createdPlan = await createPlanService.execute({ nome, preco, status });
 
-        if(!data){
-            throw new Error("Plano não cadastrado!")
-        }
-
-        res.status(201).json(data)
+    if (!createdPlan) {
+      throw new Error("Plano não cadastrado!");
     }
+
+    res.status(201).json(createdPlan);
+  }
 }

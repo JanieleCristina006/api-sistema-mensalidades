@@ -1,7 +1,7 @@
 import { Router } from "express";
 
 import { CreateClientController } from "../controller/Cliente/createClientController";
-import { ListClientController } from "../controller/Cliente/listClientsController";
+import { ListClientsController } from "../controller/Cliente/listClientsController";
 import { GetClientByIdController } from "../controller/Cliente/getClientByIdController";
 import { UpdateClientController } from "../controller/Cliente/updateClientController";
 import { DeleteClientController } from "../controller/Cliente/deleteClientController";
@@ -9,7 +9,7 @@ import { DeleteClientController } from "../controller/Cliente/deleteClientContro
 import { CreatePlanController } from "../controller/Plano/createPlanController";
 import { ListPlanController } from "../controller/Plano/listPlanController";
 import { UpdatePlanController } from "../controller/Plano/updatePlanController";
-import { UpdateStatusPlanController } from "../controller/Plano/updatePlanStatusController";
+import { UpdatePlanStatusController } from "../controller/Plano/updatePlanStatusController";
 
 import { validateBody } from "../middleware/validateBody";
 import { validateParams } from "../middleware/validateParams";
@@ -22,6 +22,8 @@ import { idSchema } from "../schemas/Global/idSchema";
 import { ListSignatureController } from "../controller/Assinatura/listSignatureController";
 import { GetSignatureByIdController } from "../controller/Assinatura/getSignatureByIdController";
 import { CancelSubscriptionController } from "../controller/Assinatura/cancelSubscriptionController";
+import { CreateSubscriptionPaymentController } from "../controller/Pagamento/createSubscriptionPaymentController";
+import { createSubscriptionPaymentSchema } from "../schemas/Pagamento/createSubscriptionPaymentSchema";
 
 const router = Router();
 
@@ -34,7 +36,7 @@ router.post(
 
 router.get(
   "/clientes",
-  new ListClientController().handle
+  new ListClientsController().handle
 );
 
 router.get(
@@ -78,7 +80,7 @@ router.patch(
   "/planos/:id/status",
   validateParams(idSchema),
   validateBody(updatePlanStatusSchema),
-  new UpdateStatusPlanController().handle
+  new UpdatePlanStatusController().handle
 );
 
 // Assinaturas
@@ -97,6 +99,13 @@ router.post(
   "/assinaturas/:id",
   validateParams(idSchema),
   new CancelSubscriptionController().handle
+)
+
+router.patch(
+  "/assinaturas/:id/confirmar-pagamento",
+  validateParams(idSchema),
+  validateBody(createSubscriptionPaymentSchema),
+  new CreateSubscriptionPaymentController().handle
 )
 
 export default router;

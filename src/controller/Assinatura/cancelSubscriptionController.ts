@@ -1,19 +1,18 @@
 import { Request, Response } from "express";
-import { CancelSubscriptionService} from "../../services/Assinatura/cancelSubscriptionService";
+import { CancelSubscriptionService } from "../../services/Assinatura/cancelSubscriptionService";
 
 export class CancelSubscriptionController {
- 
   async handle(req: Request, res: Response) {
-    const id_assinatura = Number(req.params.id);
+    const subscriptionId = Number(req.params.id);
 
-    const service = new CancelSubscriptionService();
+    const cancelSubscriptionService = new CancelSubscriptionService();
 
-    const data = await service.execute(id_assinatura);
+    const cancelledSubscription = await cancelSubscriptionService.execute(subscriptionId);
 
-    if (!data) {
+    if (!cancelledSubscription) {
       throw new Error("Assinatura cancelada!");
     }
 
-    return res.status(200).json(data);
+    return res.status(200).json(cancelledSubscription);
   }
 }

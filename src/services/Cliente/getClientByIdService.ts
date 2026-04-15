@@ -1,19 +1,17 @@
-import {prisma} from "../../config/prisma"
+import { prisma } from "../../config/prisma";
 
-
-export class GetClientByIdService{
-    async execute( id : number){
-        
-        if(!id){
-            throw new Error("Usúario não encontrado!")
-        }
-
-        const searchClient = prisma.client.findUnique({
-            where: {
-                id: id
-            }
-        })
-
-        return searchClient;
+export class GetClientByIdService {
+  async execute(id: number) {
+    if (!id) {
+      throw new Error("UsÃºario nÃ£o encontrado!");
     }
+
+    const client = prisma.client.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    return client;
+  }
 }

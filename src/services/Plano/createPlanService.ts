@@ -1,38 +1,35 @@
-import { PlanStatus } from '@prisma/client';
-import { prisma } from '../../config/prisma';
+import { PlanStatus } from "@prisma/client";
+import { prisma } from "../../config/prisma";
 
 interface CreatePlanProps {
   nome: string;
   preco: string;
-  status?: PlanStatus; 
+  status?: PlanStatus;
 }
 
 class CreatePlanService {
   async execute({ nome, preco, status = PlanStatus.ACTIVE }: CreatePlanProps) {
+    const normalizedName = nome.toLowerCase().trim();
 
-    const normalizedName = nome.toLowerCase().trim()
+    const existingPlan = await prisma.plano.findUnique({
+      where: {
+        nome: normalizedName,
+      },
+    });
 
-    const existPlan = await prisma.plano.findUnique({
-      where:{
-        nome: normalizedName
-      }
-    })
-
-    if(existPlan){
-        throw new Error("O plano já existe!")
+    if (existingPlan) {
+      throw new Error("O plano jÃ¡ existe!");
     }
 
-    const createPlan = await prisma.plano.create({
+    const createdPlan = await prisma.plano.create({
       data: {
-        nome:normalizedName,
+        nome: normalizedName,
         preco,
         status,
       },
-
     });
 
-
-    return createPlan;
+    return createdPlan;
   }
 }
 

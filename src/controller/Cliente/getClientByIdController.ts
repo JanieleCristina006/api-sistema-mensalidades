@@ -5,14 +5,14 @@ export class GetClientByIdController {
   async handle(req: Request, res: Response) {
     const id = Number(req.params.id);
 
-    const service = new GetClientByIdService();
+    const getClientByIdService = new GetClientByIdService();
 
-    const data = await service.execute(id);
+    const client = await getClientByIdService.execute(id);
 
-    if (!data) {
-      throw new Error("Cliente não encontrado");
+    if (!client) {
+      throw new Error("Cliente não encontrado!");
     }
 
-    return res.status(200).json(data);
+    return res.status(200).json(client);
   }
 }

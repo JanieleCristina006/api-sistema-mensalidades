@@ -1,40 +1,35 @@
-
-import { prisma } from '../../config/prisma';
+import { prisma } from "../../config/prisma";
 
 interface UpdatePlanProps {
-  id: number
+  id: number;
   nome: string;
   preco: string;
- 
 }
 
 export class UpdatePlanService {
   async execute({ nome, preco, id }: UpdatePlanProps) {
+    const normalizedName = nome.toLowerCase().trim();
 
-    const normalizedName = nome.toLowerCase().trim()
+    const existingPlan = await prisma.plano.findUnique({
+      where: {
+        id,
+      },
+    });
 
-    const existPlan = await prisma.plano.findUnique({
-        where:{
-            id: id
-        }
-    })
-
-    if(!existPlan){
-        throw new Error("Plano não encontrado!")
+    if (!existingPlan) {
+      throw new Error("Plano nÃ£o encontrado!");
     }
 
-    const updatePlan = await prisma.plano.update({
-      where:{
-       id:id
+    const updatedPlan = await prisma.plano.update({
+      where: {
+        id,
       },
       data: {
         nome: normalizedName,
         preco,
-      }
-    })
+      },
+    });
 
-    return updatePlan;
+    return updatedPlan;
   }
 }
-
-

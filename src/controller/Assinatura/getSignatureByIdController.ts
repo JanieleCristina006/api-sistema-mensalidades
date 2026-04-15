@@ -1,18 +1,18 @@
 import { Request, Response } from "express";
-import { getSignatureByIdService } from "../../services/Assinatura/getSignatureByIdService";
+import { GetSignatureByIdService } from "../../services/Assinatura/getSignatureByIdService";
 
 export class GetSignatureByIdController {
   async handle(req: Request, res: Response) {
     const id = Number(req.params.id);
 
-    const service = new getSignatureByIdService();
+    const getSignatureByIdService = new GetSignatureByIdService();
 
-    const data = await service.execute(id);
+    const subscription = await getSignatureByIdService.execute(id);
 
-    if (!data) {
+    if (!subscription) {
       throw new Error("Assinatura não encontrada!");
     }
 
-    return res.status(200).json(data);
+    return res.status(200).json(subscription);
   }
 }

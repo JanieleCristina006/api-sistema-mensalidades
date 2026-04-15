@@ -4,15 +4,21 @@ import { UpdateClientService } from "../../services/Cliente/updateClientService"
 export class UpdateClientController {
   async handle(req: Request, res: Response) {
     const id = Number(req.params.id);
-    const { email,nome,cpf,telefone } = req.body
+    const { email, nome, cpf, telefone } = req.body;
 
-    const service = new UpdateClientService();
+    const updateClientService = new UpdateClientService();
 
-    const data = await service.execute({nome,email,cpf,telefone,id});
+    const updatedClient = await updateClientService.execute({
+      nome,
+      email,
+      cpf,
+      telefone,
+      id,
+    });
 
     return res.status(200).json({
       message: "Cliente atualizado com sucesso",
-      data,
-  });
+      data: updatedClient,
+    });
   }
 }
