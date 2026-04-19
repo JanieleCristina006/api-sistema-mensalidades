@@ -2,22 +2,19 @@ import { prisma } from "../../config/prisma";
 import { PaymentMethod, PaymentStatus, SignatureStatus } from "@prisma/client";
 import { addMonths } from "date-fns";
 
-interface CreateSubscriptionPaymentProps {
+interface ConfirmSubscriptionPaymentProps {
   id_assinatura: number;
-  valor: number;
   metodo: PaymentMethod;
   obs?: string;
 }
 
-class CreateSubscriptionPaymentService {
-  async execute({ id_assinatura, metodo, obs }: CreateSubscriptionPaymentProps) {
+class ConfirmSubscriptionPaymentService {
+  async execute({ id_assinatura, metodo, obs }: ConfirmSubscriptionPaymentProps) {
+    
     const existSignature = await prisma.assinatura.findUnique({
       where: {
         id: id_assinatura,
       },
-      include: {
-        plano:true
-      }
     });
 
     if (!existSignature) {
@@ -28,31 +25,32 @@ class CreateSubscriptionPaymentService {
       throw new Error("Assinatura cancelada não pode receber pagamento!");
     }
 
-    const referencia_mes = existSignature.proximo_vencimento.getMonth() + 1;
-    const referencia_ano = existSignature.proximo_vencimento.getFullYear();
+    //const referencia_mes = existSignature.proximo_vencimento.getMonth() + 1;
+    //const referencia_ano = existSignature.proximo_vencimento.getFullYear();
 
+ 
     const existPayment = await prisma.pagamento.findFirst({
       where: {
         assinatura_id: id_assinatura,
-        referencia_mes,
-        referencia_ano,
+        status: PaymentStatus.PENDING,
       },
     });
 
-    if (existPayment) {
-      throw new Error("Já existe pagamento registrado para esse ciclo da assinatura!");
+    if (!existPayment) {
+      throw new Error("Nenhum pagamento pendente encontrado para esse ciclo!");
     }
 
     const result = await prisma.$transaction(async (tx) => {
-      const pagamento = await tx.pagamento.create({
+
+      const updatedPayment = await tx.pagamento.update({
+        where: {
+          id: existPayment.id,
+        },
         data: {
-          assinatura_id: id_assinatura,
-          valor: existSignature.plano.preco,
-          metodo,
           status: PaymentStatus.PAID,
-          referencia_mes,
-          referencia_ano,
+          metodo,
           obs,
+          pago_em: new Date(),
         },
       });
 
@@ -61,15 +59,15 @@ class CreateSubscriptionPaymentService {
         data: {
           status: SignatureStatus.ACTIVE,
           data_ultimo_pagamento: new Date(),
-          proximo_vencimento: addMonths(existSignature.proximo_vencimento, 1),
+          proximo_vencimento: addMonths(new Date(), 1)
         },
       });
 
-      return pagamento;
+      return updatedPayment;
     });
 
     return result;
   }
 }
 
-export { CreateSubscriptionPaymentService };
+export { ConfirmSubscriptionPaymentService };

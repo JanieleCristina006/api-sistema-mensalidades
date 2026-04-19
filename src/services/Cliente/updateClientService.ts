@@ -14,7 +14,7 @@ export class UpdateClientService {
       throw new Error("Usuário não encontrado!");
     }
 
-    const updatedClient = await prisma.client.update({
+    const updatedClient = await prisma.cliente.update({
       where: {
         id,
       },

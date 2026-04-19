@@ -6,7 +6,7 @@ export class GetClientByIdService {
       throw new Error("UsÃºario nÃ£o encontrado!");
     }
 
-    const client = prisma.client.findUnique({
+    const client = prisma.cliente.findUnique({
       where: {
         id,
       },

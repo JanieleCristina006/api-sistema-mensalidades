@@ -24,8 +24,17 @@ import { GetSignatureByIdController } from "../controller/Assinatura/getSignatur
 import { CancelSubscriptionController } from "../controller/Assinatura/cancelSubscriptionController";
 import { CreateSubscriptionPaymentController } from "../controller/Pagamento/createSubscriptionPaymentController";
 import { createSubscriptionPaymentSchema } from "../schemas/Pagamento/createSubscriptionPaymentSchema";
+import { CreateAdminController } from "../controller/Admin/CreateAdminController";
+import { createAdminSchema } from "../schemas/Admin/createAdminSchema";
 
 const router = Router();
+
+// Admins
+router.post(
+  "/admins",
+  validateBody(createAdminSchema),
+  new CreateAdminController().handle
+);
 
 // Clientes
 router.post(

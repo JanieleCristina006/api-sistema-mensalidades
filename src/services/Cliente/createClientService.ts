@@ -1,6 +1,6 @@
 import { prisma } from "../../config/prisma";
 import { addDays } from "date-fns";
-import { PlanStatus } from "@prisma/client";
+import { PlanStatus, PaymentStatus } from "@prisma/client";
 
 interface CreateClientSubscriptionProps {
   email: string;
@@ -18,22 +18,17 @@ export class CreateClientService {
     telefone,
     plano_id,
   }: CreateClientSubscriptionProps) {
-    const existingEmail = await prisma.client.findUnique({
-      where: {
-        email,
-      },
+
+    const existingEmail = await prisma.cliente.findUnique({
+      where: { email },
     });
 
-    const existingPhone = await prisma.client.findUnique({
-      where: {
-        telefone,
-      },
+    const existingPhone = await prisma.cliente.findUnique({
+      where: { telefone },
     });
 
-    const existingCpf = await prisma.client.findUnique({
-      where: {
-        cpf,
-      },
+    const existingCpf = await prisma.cliente.findUnique({
+      where: { cpf },
     });
 
     const existingPlan = await prisma.plano.findFirst({
@@ -44,23 +39,24 @@ export class CreateClientService {
     });
 
     if (!existingPlan) {
-      throw new Error("Plano nÃ£o cadastrado ou inativo/ARCHIVED");
+      throw new Error("Plano não cadastrado ou inativo/ARCHIVED");
     }
 
     if (existingCpf) {
-      throw new Error("CPF jÃ¡ cadastrado!");
+      throw new Error("CPF já cadastrado!");
     }
 
     if (existingEmail) {
-      throw new Error("Email jÃ¡ cadastrado!");
+      throw new Error("Email já cadastrado!");
     }
 
     if (existingPhone) {
-      throw new Error("Telefone jÃ¡ cadastrado!");
+      throw new Error("Telefone já cadastrado!");
     }
 
-    const createdClientSubscription = await prisma.$transaction(async (tx) => {
-      const createdClient = await tx.client.create({
+    const result = await prisma.$transaction(async (tx) => {
+
+      const createdClient = await tx.cliente.create({
         data: {
           nome,
           email,
@@ -77,9 +73,27 @@ export class CreateClientService {
         },
       });
 
-      return { createdClient, createdSubscription };
+      const hoje = new Date();
+
+      const createdPayment = await tx.pagamento.create({
+        data: {
+          assinatura_id: createdSubscription.id,
+          valor: existingPlan.preco,
+          status: PaymentStatus.PENDING,
+          metodo: "PIX",
+          referencia_mes: hoje.getMonth() + 1,
+          referencia_ano: hoje.getFullYear(),
+          obs: "Primeiro pagamento gerado automaticamente",
+        },
+      });
+
+      return {
+        createdClient,
+        createdSubscription,
+        createdPayment,
+      };
     });
 
-    return createdClientSubscription;
+    return result;
   }
 }

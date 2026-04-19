@@ -30,7 +30,7 @@ enum PaymentMethod {
   CREDIT_CARD
 }
 
-model Client {
+model Cliente {
   id          Int           @id @default(autoincrement())
   email       String        @unique
   nome        String
@@ -38,6 +38,14 @@ model Client {
   cpf         String        @unique
   telefone    String        @unique
   assinaturas Assinatura[]
+}
+
+model Admin {
+  id         Int      @id @default(autoincrement())
+  nome       String
+  email      String   @unique
+  senha      String
+  criado_em  DateTime @default(now())
 }
 
 model Plano {
@@ -53,7 +61,7 @@ model Plano {
 model Assinatura {
   id                    Int              @id @default(autoincrement())
   client_id             Int
-  client                Client           @relation(fields: [client_id], references: [id])
+  client                Cliente           @relation(fields: [client_id], references: [id])
   plano_id              Int
   plano                 Plano            @relation(fields: [plano_id], references: [id])
   status                SignatureStatus  @default(ACTIVE)
@@ -72,6 +80,7 @@ model Pagamento {
   valor          Decimal        @db.Decimal(10, 2)
   status         PaymentStatus  @default(PENDING)
   metodo         PaymentMethod
+  pago_em        DateTime?
   referencia_mes Int
   referencia_ano Int
   obs            String?

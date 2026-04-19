@@ -1,17 +1,17 @@
 import { Request, Response } from "express";
-import { CreateSubscriptionPaymentService } from "../../services/Pagamento/CreateSubscriptionPaymentService";
+import { ConfirmSubscriptionPaymentService } from "../../services/Pagamento/CreateSubscriptionPaymentService";
 
 export class CreateSubscriptionPaymentController {
   async handle(req: Request, res: Response) {
     const id_assinatura = Number(req.params.id);
-    const { valor, metodo, obs } = req.body;
+    const { metodo, obs } = req.body;
 
-    const createSubscriptionPaymentService = new CreateSubscriptionPaymentService();
+    const createSubscriptionPaymentService = new ConfirmSubscriptionPaymentService();
 
     const createdSubscriptionPayment =
       await createSubscriptionPaymentService.execute({
         id_assinatura,
-        valor,
+       
         metodo,
         obs,
       });

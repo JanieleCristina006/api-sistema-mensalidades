@@ -1,8 +1,8 @@
 # Sistema de Mensalidades
 
-API backend em Node.js para gerenciamento de clientes de um sistema de mensalidades. O projeto foi construído com Express, TypeScript, Prisma e PostgreSQL e, no estado atual, já expõe operações CRUD para clientes.
+API backend em Node.js para gerenciamento de clientes, planos, assinaturas e pagamentos recorrentes. O projeto usa Express, TypeScript, Prisma e PostgreSQL, com validacao de entrada via Zod e um job em `node-cron` para marcar assinaturas vencidas.
 
-## Tecnologias utilizadas
+## Stack
 
 - Node.js
 - TypeScript
@@ -10,26 +10,41 @@ API backend em Node.js para gerenciamento de clientes de um sistema de mensalida
 - Prisma ORM
 - PostgreSQL
 - Zod
+- node-cron
+- nodemailer
+- date-fns
+
+## Funcionalidades atuais
+
+- Cadastro, listagem, busca, atualizacao e exclusao de clientes
+- Cadastro, listagem, atualizacao e alteracao de status de planos
+- Criacao automatica de assinatura ao cadastrar um cliente
+- Listagem e consulta de assinaturas
+- Cancelamento manual de assinatura
+- Confirmacao de pagamento de assinatura
+- Verificacao manual e automatica de assinaturas vencidas
 
 ## Estrutura do projeto
 
 ```text
 src/
-  config/        # conexao com o banco
-  controller/    # controllers da API
-  middleware/    # middlewares de validacao e tratamento de erro
-  routes/        # definicao das rotas
-  schemas/       # schemas Zod
+  config/        # configuracao do Prisma
+  controller/    # controllers HTTP
+  cron/          # jobs agendados
+  middleware/    # validacao e tratamento de erro
+  routes/        # rotas da API
+  schemas/       # validacoes com Zod
   services/      # regras de negocio
 prisma/
-  schema.prisma  # models do banco de dados
+  migrations/    # historico de migrations
+  schema.prisma  # schema do banco
 ```
 
 ## Requisitos
 
 - Node.js 18 ou superior
-- PostgreSQL em execucao
-- Variavel `DATABASE_URL` configurada
+- PostgreSQL disponivel
+- Variavel de ambiente `DATABASE_URL` configurada
 
 ## Instalacao
 
@@ -37,42 +52,41 @@ prisma/
 npm install
 ```
 
-## Configuracao de ambiente
+## Ambiente
 
-Crie um arquivo `.env` na raiz do projeto com a conexao do PostgreSQL.
-
-Para a aplicacao, use `DATABASE_URL`.
-Para `prisma migrate`, prefira `DIRECT_URL` quando estiver usando pooler (como Neon):
+Crie um arquivo `.env` na raiz do projeto:
 
 ```env
-DATABASE_URL="postgresql://usuario:senha@host-pooler:5432/sistema_mensalidades"
-DIRECT_URL="postgresql://usuario:senha@host-direto:5432/sistema_mensalidades"
+DATABASE_URL="postgresql://usuario:senha@host:5432/sistema_mensalidades"
+EMAIL_USER="seu-email@gmail.com"
+EMAIL_PASS="sua-senha-ou-app-password"
 ```
 
-No Prisma 7, o `schema.prisma` pode ficar sem `url`, mas o bloco `datasource` continua obrigatorio:
+O projeto instancia o Prisma em [src/config/prisma.ts](c:\Users\janie\Desktop\projetos_backend\sistema_mensalidades\src\config\prisma.ts) usando `@prisma/adapter-pg`, entao a aplicacao falha ao iniciar se `DATABASE_URL` nao estiver definida.
 
-```prisma
-datasource db {
-  provider = "postgresql"
-}
-```
+Para envio de e-mails, o transporter em [src/config/mail.ts](c:\Users\janie\Desktop\projetos_backend\sistema_mensalidades\src\config\mail.ts) usa Gmail via `nodemailer`, com `EMAIL_USER` e `EMAIL_PASS`.
 
 ## Banco de dados
 
-O projeto utiliza Prisma com PostgreSQL. Para gerar o client e sincronizar o schema:
+Gerar o client do Prisma:
 
 ```bash
 npm run prisma:generate
+```
+
+Sincronizar o schema sem criar migration:
+
+```bash
 npm run prisma:push
 ```
 
-Se preferir trabalhar com migrations em ambiente de desenvolvimento:
+Criar e aplicar migration em desenvolvimento:
 
 ```bash
 npm run prisma:migrate
 ```
 
-## Executando o projeto
+## Executando a API
 
 ```bash
 npm run dev
@@ -84,31 +98,46 @@ Servidor padrao:
 http://localhost:3000
 ```
 
+A porta esta fixa em [src/server.ts](c:\Users\janie\Desktop\projetos_backend\sistema_mensalidades\src\server.ts).
+
+## Regras de negocio importantes
+
+- Ao criar um cliente, a API tambem cria uma assinatura automaticamente com o `plano_id` informado.
+- O plano escolhido no cadastro do cliente precisa existir e estar com status `ACTIVE`.
+- O primeiro vencimento da assinatura e definido para 30 dias apos o cadastro.
+- Ao confirmar um pagamento, a API registra um pagamento com status `PAID` e avanca o `proximo_vencimento` em 1 mes.
+- A API impede pagamento duplicado para a mesma assinatura no mesmo mes/ano de referencia.
+- Assinaturas canceladas nao podem receber confirmacao de pagamento.
+- O job de vencimento agenda a verificacao diaria no horario configurado em `src/cron/jobs.ts`.
+- Assinaturas atrasadas sao alteradas de `ACTIVE` para `OVERDUE`.
+- Quando o atraso e multiplo de 3 dias, a aplicacao tenta enviar um e-mail real ao cliente.
+
 ## Modelos do banco
 
 ### Client
 
-- `id`: inteiro autoincremental
-- `nome`: nome do cliente
-- `email`: unico
-- `cpf`: unico
-- `telefone`: telefone do cliente
-- `criado_em`: data de criacao
+- `id`
+- `nome`
+- `email` unico
+- `cpf` unico
+- `telefone` unico
+- `criado_em`
 
 ### Plano
 
 - `id`
-- `nome`
+- `nome` unico
 - `preco`
+- `status`: `ACTIVE`, `INACTIVE`, `ARCHIVED`
 - `criado_em`
 - `atualizado_em`
 
-### Assinaturas
+### Assinatura
 
 - `id`
 - `client_id`
 - `plano_id`
-- `status`
+- `status`: `ACTIVE`, `CANCELLED`, `OVERDUE`
 - `data_inicio`
 - `data_ultimo_pagamento`
 - `proximo_vencimento`
@@ -120,84 +149,81 @@ http://localhost:3000
 - `id`
 - `assinatura_id`
 - `valor`
-- `data_pagamento`
-- `status`
-- `metodo`
+- `status`: `PAID`, `PENDING`, `FAILED`, `REFUNDED`
+- `metodo`: `PIX`, `CREDIT_CARD`
+- `referencia_mes`
+- `referencia_ano`
 - `obs`
 - `criado_em`
 
-## Endpoints disponiveis
+Restricao importante:
 
-### `POST /cadastrar`
+- Existe uma chave unica composta em `Pagamento` para `assinatura_id + referencia_mes + referencia_ano`.
 
-Cadastra um novo cliente.
+## Endpoints
 
-#### Body
+### Clientes
 
-```json
-{
-  "nome": "Maria Silva",
-  "email": "maria@email.com",
-  "cpf": "12345678901",
-  "telefone": "11999998888"
-}
-```
+#### `POST /clientes`
 
-#### Validacoes
+Cadastra um cliente e cria a primeira assinatura.
 
-- `nome`: minimo de 3 caracteres
-- `email`: deve ser valido
-- `cpf`: deve conter 11 digitos
-- `telefone`: deve seguir um formato valido
-
-#### Resposta de sucesso
+Body:
 
 ```json
 {
-  "id": 1,
   "nome": "Maria Silva",
   "email": "maria@email.com",
   "cpf": "12345678901",
   "telefone": "11999998888",
-  "criado_em": "2026-04-07T00:00:00.000Z",
-  "assinaturas": []
+  "plano_id": 1
 }
 ```
 
-### `GET /clientes`
+Validacoes:
 
-Lista todos os clientes cadastrados.
+- `nome`: minimo de 3 caracteres
+- `email`: formato valido
+- `cpf`: exatamente 11 digitos
+- `telefone`: formato numerico valido
+- `plano_id`: numero maior que 0
 
-#### Resposta de sucesso
+Resposta esperada:
 
 ```json
-[
-  {
-    "id": 1,
-    "nome": "Maria Silva",
-    "email": "maria@email.com",
-    "cpf": "12345678901",
-    "telefone": "11999998888",
-    "criado_em": "2026-04-07T00:00:00.000Z"
+{
+  "message": "Cliente cadastrado!",
+  "data": {
+    "createdClient": {
+      "id": 1,
+      "nome": "Maria Silva",
+      "email": "maria@email.com",
+      "cpf": "12345678901",
+      "telefone": "11999998888"
+    },
+    "createdSubscription": {
+      "id": 1,
+      "client_id": 1,
+      "plano_id": 1,
+      "status": "ACTIVE"
+    }
   }
-]
+}
 ```
 
-### `GET /cliente/:id`
+#### `GET /clientes`
 
-Busca um cliente pelo ID.
+Lista clientes com suas assinaturas.
 
-#### Exemplo
+#### `GET /clientes/:id`
 
-```bash
-GET /cliente/1
-```
+Busca um cliente por ID.
 
-### `PUT /cliente/:id`
+#### `PUT /clientes/:id`
 
-Atualiza os dados de um cliente.
+Atualiza `nome`, `email`, `cpf` e `telefone`.
 
-#### Body
+Body:
 
 ```json
 {
@@ -208,60 +234,147 @@ Atualiza os dados de um cliente.
 }
 ```
 
-#### Resposta de sucesso
-
-```json
-{
-  "message": "Cliente atualizado com sucesso",
-  "data": {
-    "id": 1,
-    "nome": "Maria Souza",
-    "email": "maria.souza@email.com",
-    "cpf": "12345678901",
-    "telefone": "11988887777",
-    "criado_em": "2026-04-07T00:00:00.000Z"
-  }
-}
-```
-
-### `DELETE /cliente/:id`
+#### `DELETE /clientes/:id`
 
 Remove um cliente pelo ID.
 
-#### Resposta de sucesso
+Observacao:
+
+- O servico atual usa `deleteMany`, entao a resposta de sucesso nao retorna o cliente excluido, apenas a mensagem do controller.
+
+### Planos
+
+#### `POST /planos`
+
+Cria um plano.
+
+Body:
 
 ```json
 {
-  "message": "Cliente excluído com sucesso!"
+  "nome": "Premium",
+  "preco": "99.90",
+  "status": "ACTIVE"
 }
 ```
 
-## Padrao de erros
+Observacoes:
 
-### Erros de validacao
+- `nome` e normalizado para minusculas antes de salvar.
+- `status` e opcional. Quando omitido, o padrao e `ACTIVE`.
 
-Quando o body, params ou query nao respeitam o schema Zod, a API responde com `400 Bad Request`:
+#### `GET /planos`
+
+Lista todos os planos.
+
+#### `PUT /planos/:id`
+
+Atualiza `nome` e `preco` de um plano.
+
+Body:
 
 ```json
 {
-  "error": "Erro validação",
-  "details": [
-    {
-      "campo": "body.email",
-      "mensagem": "Insira um email válido!"
-    }
-  ]
+  "nome": "Premium anual",
+  "preco": "109.90"
 }
 ```
 
-### Erros de regra de negocio
+Observacao:
 
-Exemplos:
+- Essa rota nao possui validacao de body via Zod no estado atual do projeto.
 
-- email ja cadastrado
-- telefone ja cadastrado
-- cliente nao encontrado
-- id invalido
+#### `PATCH /planos/:id/status`
+
+Atualiza apenas o status do plano.
+
+Body:
+
+```json
+{
+  "status": "INACTIVE"
+}
+```
+
+Valores aceitos:
+
+- `ACTIVE`
+- `INACTIVE`
+- `ARCHIVED`
+
+### Assinaturas
+
+#### `GET /assinaturas`
+
+Lista todas as assinaturas.
+
+#### `GET /assinaturas/:id`
+
+Busca uma assinatura por ID.
+
+#### `POST /assinaturas/:id`
+
+Cancela uma assinatura, alterando o status para `CANCELLED`.
+
+#### `POST /assinaturas/verificar-vencidas`
+
+Executa manualmente a verificacao de assinaturas vencidas.
+
+Observacoes:
+
+- O servico procura assinaturas `ACTIVE` com `proximo_vencimento` menor que a data atual.
+- Assinaturas encontradas sao atualizadas para `OVERDUE`.
+- Se o atraso for multiplo de 3 dias, o servico tenta enviar um e-mail com o assunto `Sua assinatura venceu`.
+- Hoje o controller retorna `message`, mas o campo `data` tende a vir `null`/`undefined`, porque o servico nao devolve explicitamente o resultado.
+
+#### `PATCH /assinaturas/:id/confirmar-pagamento`
+
+Registra o pagamento de uma assinatura.
+
+Body:
+
+```json
+{
+  "metodo": "PIX",
+  "obs": "Pagamento confirmado no caixa"
+}
+```
+
+Valores aceitos para `metodo`:
+
+- `PIX`
+- `CREDIT_CARD`
+
+Observacao:
+
+- Embora o controller leia `valor` do body, o servico usa o preco do plano vinculado a assinatura para criar o pagamento.
+
+## Job agendado
+
+O arquivo [src/cron/jobs.ts](c:\Users\janie\Desktop\projetos_backend\sistema_mensalidades\src\cron\jobs.ts) agenda a verificacao de vencimento com a expressao:
+
+```ts
+"27 11 * * *"
+```
+
+Na pratica, isso significa:
+
+- execucao diaria as 11:27
+- disparo automatico no boot da aplicacao
+- timezone `America/Sao_Paulo`
+- log no console com timestamp ISO no momento da execucao
+
+## Padrao de erro atual
+
+O middleware global em [src/middleware/error.ts](c:\Users\janie\Desktop\projetos_backend\sistema_mensalidades\src\middleware\error.ts) responde com status `400` para erros lancados pela aplicacao:
+
+```json
+{
+  "error": "Mensagem do erro"
+}
+```
+
+Nao ha, no estado atual, uma diferenciacao entre erros de validacao, regra de negocio e recursos nao encontrados.
 
 ## Scripts disponiveis
 
@@ -272,17 +385,11 @@ npm run prisma:push
 npm run prisma:migrate
 ```
 
-## Observacoes importantes
+## Observacoes do estado atual
 
-- A API atualmente possui rotas implementadas apenas para `Client`.
-- O schema Prisma ja possui as entidades `Plano`, `Assinaturas` e `Pagamento`, mas ainda sem rotas expostas.
-- O projeto usa a porta `3000` fixamente em `src/server.ts`.
-- O client do Prisma esta sendo gerado em `src/generated/prisma`.
-
-## Melhorias sugeridas
-
-- Adicionar um endpoint de health check
-- Criar arquivo `.env.example`
-- Padronizar mensagens e codigos de erro
-- Implementar testes automatizados
-- Documentar a API com Swagger/OpenAPI no futuro
+- O projeto ainda nao possui testes automatizados.
+- Nao existe `.env.example`.
+- A API nao possui rota de health check.
+- O envio de email depende de credenciais Gmail configuradas no `.env`.
+- Alguns textos de erro retornados pelo codigo apresentam problemas de codificacao.
+- O README foi atualizado com base no comportamento implementado hoje, nao em um contrato futuro.

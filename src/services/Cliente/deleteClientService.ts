@@ -7,7 +7,7 @@ export class DeleteClientService {
       throw new Error("Usuário não encontrado!");
     }
 
-    return await prisma.client.deleteMany({
+    return await prisma.cliente.deleteMany({
       where: {
         id,
       },

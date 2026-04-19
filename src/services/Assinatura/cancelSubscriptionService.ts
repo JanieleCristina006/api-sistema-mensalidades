@@ -10,7 +10,7 @@ export class CancelSubscriptionService {
     });
 
     if (!existingSubscription) {
-      throw new Error("Assinatura nÃ£o encontrada!");
+      throw new Error("Assinatura não encontrada!");
     }
 
     const updatedSubscription = await prisma.assinatura.update({
