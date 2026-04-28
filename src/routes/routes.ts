@@ -25,15 +25,25 @@ import { CancelSubscriptionController } from "../controller/Assinatura/cancelSub
 import { CreateSubscriptionPaymentController } from "../controller/Pagamento/createSubscriptionPaymentController";
 import { createSubscriptionPaymentSchema } from "../schemas/Pagamento/createSubscriptionPaymentSchema";
 import { CreateAdminController } from "../controller/Admin/CreateAdminController";
+import { LoginController } from "../controller/Admin/LoginController";
 import { createAdminSchema } from "../schemas/Admin/createAdminSchema";
+import { loginAdminSchema } from "../schemas/Admin/loginAdminSchema";
+import { upload } from "../config/multer";
 
 const router = Router();
 
 // Admins
 router.post(
   "/admins",
+  upload.single("avatar"),
   validateBody(createAdminSchema),
   new CreateAdminController().handle
+);
+
+router.post(
+  "/admins/login",
+  validateBody(loginAdminSchema),
+  new LoginController().handle
 );
 
 // Clientes
@@ -70,6 +80,7 @@ router.delete(
 // Planos
 router.post(
   "/planos",
+  upload.single("banner"),
   validateBody(createPlanSchema),
   new CreatePlanController().handle
 );

@@ -1,0 +1,573 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-04-27T00:00:00.000Z",
+  "__export_source": "codex",
+  "resources": [
+    {
+      "_id": "wrk_sistema_mensalidades",
+      "parentId": null,
+      "modified": 0,
+      "created": 0,
+      "name": "Sistema Mensalidades",
+      "description": "Rotas para testar a API Sistema de Mensalidades.",
+      "scope": "collection",
+      "_type": "workspace"
+    },
+    {
+      "_id": "env_sistema_mensalidades",
+      "parentId": "wrk_sistema_mensalidades",
+      "modified": 0,
+      "created": 0,
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:3000",
+        "cliente_id": "1",
+        "plano_id": "1",
+        "assinatura_id": "1"
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "base_url",
+          "cliente_id",
+          "plano_id",
+          "assinatura_id"
+        ]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 0,
+      "_type": "environment"
+    },
+    {
+      "_id": "fld_admins",
+      "parentId": "wrk_sistema_mensalidades",
+      "modified": 0,
+      "created": 0,
+      "name": "Admins",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -400,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_create_admin",
+      "parentId": "fld_admins",
+      "modified": 0,
+      "created": 0,
+      "url": "{{ _.base_url }}/admins",
+      "name": "Criar Admin",
+      "description": "Envie como multipart/form-data. O arquivo precisa estar no campo avatar.",
+      "method": "POST",
+      "body": {
+        "mimeType": "multipart/form-data",
+        "params": [
+          {
+            "id": "pair_admin_nome",
+            "name": "nome",
+            "value": "Admin Teste",
+            "description": "",
+            "disabled": false,
+            "type": "text",
+            "multiline": false
+          },
+          {
+            "id": "pair_admin_email",
+            "name": "email",
+            "value": "admin@email.com",
+            "description": "",
+            "disabled": false,
+            "type": "text",
+            "multiline": false
+          },
+          {
+            "id": "pair_admin_senha",
+            "name": "senha",
+            "value": "123456",
+            "description": "",
+            "disabled": false,
+            "type": "text",
+            "multiline": false
+          },
+          {
+            "id": "pair_admin_avatar",
+            "name": "avatar",
+            "value": "",
+            "description": "Selecione uma imagem",
+            "disabled": false,
+            "type": "file",
+            "fileName": ""
+          }
+        ]
+      },
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -399,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_login_admin",
+      "parentId": "fld_admins",
+      "modified": 0,
+      "created": 0,
+      "url": "{{ _.base_url }}/admins/login",
+      "name": "Login Admin",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"admin@email.com\",\n  \"senha\": \"123456\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -398,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_clientes",
+      "parentId": "wrk_sistema_mensalidades",
+      "modified": 0,
+      "created": 0,
+      "name": "Clientes",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -300,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_create_cliente",
+      "parentId": "fld_clientes",
+      "modified": 0,
+      "created": 0,
+      "url": "{{ _.base_url }}/clientes",
+      "name": "Criar Cliente",
+      "description": "",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Maria Silva\",\n  \"email\": \"maria@email.com\",\n  \"cpf\": \"12345678901\",\n  \"telefone\": \"11999998888\",\n  \"plano_id\": 1\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -299,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_list_clientes",
+      "parentId": "fld_clientes",
+      "modified": 0,
+      "created": 0,
+      "url": "{{ _.base_url }}/clientes",
+      "name": "Listar Clientes",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -298,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_cliente",
+      "parentId": "fld_clientes",
+      "modified": 0,
+      "created": 0,
+      "url": "{{ _.base_url }}/clientes/{{ _.cliente_id }}",
+      "name": "Buscar Cliente por ID",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -297,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_update_cliente",
+      "parentId": "fld_clientes",
+      "modified": 0,
+      "created": 0,
+      "url": "{{ _.base_url }}/clientes/{{ _.cliente_id }}",
+      "name": "Atualizar Cliente",
+      "description": "",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Maria Souza\",\n  \"email\": \"maria.souza@email.com\",\n  \"cpf\": \"12345678901\",\n  \"telefone\": \"11988887777\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -296,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_delete_cliente",
+      "parentId": "fld_clientes",
+      "modified": 0,
+      "created": 0,
+      "url": "{{ _.base_url }}/clientes/{{ _.cliente_id }}",
+      "name": "Excluir Cliente",
+      "description": "",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -295,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_planos",
+      "parentId": "wrk_sistema_mensalidades",
+      "modified": 0,
+      "created": 0,
+      "name": "Planos",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -200,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_create_plano",
+      "parentId": "fld_planos",
+      "modified": 0,
+      "created": 0,
+      "url": "{{ _.base_url }}/planos",
+      "name": "Criar Plano",
+      "description": "Envie como multipart/form-data. O arquivo precisa estar no campo banner.",
+      "method": "POST",
+      "body": {
+        "mimeType": "multipart/form-data",
+        "params": [
+          {
+            "id": "pair_plano_nome",
+            "name": "nome",
+            "value": "Giga mais +",
+            "description": "",
+            "disabled": false,
+            "type": "text",
+            "multiline": false
+          },
+          {
+            "id": "pair_plano_preco",
+            "name": "preco",
+            "value": "120",
+            "description": "",
+            "disabled": false,
+            "type": "text",
+            "multiline": false
+          },
+          {
+            "id": "pair_plano_descricao",
+            "name": "descricao",
+            "value": "O Giga Mais e o plano ideal para quem precisa de mais velocidade.",
+            "description": "",
+            "disabled": false,
+            "type": "text",
+            "multiline": true
+          },
+          {
+            "id": "pair_plano_status",
+            "name": "status",
+            "value": "ACTIVE",
+            "description": "Opcional: ACTIVE, INACTIVE ou ARCHIVED",
+            "disabled": true,
+            "type": "text",
+            "multiline": false
+          },
+          {
+            "id": "pair_plano_banner",
+            "name": "banner",
+            "value": "",
+            "description": "Selecione uma imagem",
+            "disabled": false,
+            "type": "file",
+            "fileName": ""
+          }
+        ]
+      },
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -199,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_list_planos",
+      "parentId": "fld_planos",
+      "modified": 0,
+      "created": 0,
+      "url": "{{ _.base_url }}/planos",
+      "name": "Listar Planos",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -198,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_update_plano",
+      "parentId": "fld_planos",
+      "modified": 0,
+      "created": 0,
+      "url": "{{ _.base_url }}/planos/{{ _.plano_id }}",
+      "name": "Atualizar Plano",
+      "description": "",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Giga mais atualizado\",\n  \"preco\": \"129.90\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -197,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_update_plano_status",
+      "parentId": "fld_planos",
+      "modified": 0,
+      "created": 0,
+      "url": "{{ _.base_url }}/planos/{{ _.plano_id }}/status",
+      "name": "Atualizar Status do Plano",
+      "description": "",
+      "method": "PATCH",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"status\": \"INACTIVE\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -196,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_assinaturas",
+      "parentId": "wrk_sistema_mensalidades",
+      "modified": 0,
+      "created": 0,
+      "name": "Assinaturas",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -100,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_list_assinaturas",
+      "parentId": "fld_assinaturas",
+      "modified": 0,
+      "created": 0,
+      "url": "{{ _.base_url }}/assinaturas",
+      "name": "Listar Assinaturas",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -99,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_assinatura",
+      "parentId": "fld_assinaturas",
+      "modified": 0,
+      "created": 0,
+      "url": "{{ _.base_url }}/assinaturas/{{ _.assinatura_id }}",
+      "name": "Buscar Assinatura por ID",
+      "description": "",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -98,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_cancel_assinatura",
+      "parentId": "fld_assinaturas",
+      "modified": 0,
+      "created": 0,
+      "url": "{{ _.base_url }}/assinaturas/{{ _.assinatura_id }}",
+      "name": "Cancelar Assinatura",
+      "description": "",
+      "method": "POST",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": -97,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_confirmar_pagamento",
+      "parentId": "fld_assinaturas",
+      "modified": 0,
+      "created": 0,
+      "url": "{{ _.base_url }}/assinaturas/{{ _.assinatura_id }}/confirmar-pagamento",
+      "name": "Confirmar Pagamento",
+      "description": "",
+      "method": "PATCH",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"metodo\": \"PIX\",\n  \"obs\": \"Pagamento confirmado no caixa\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -96,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    }
+  ]
+}
