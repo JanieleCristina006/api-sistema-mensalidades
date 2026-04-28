@@ -2,7 +2,7 @@ import "dotenv/config";
 import express from 'express';
 import router from './routes/routes';
 import { errorHandler } from './middleware/error';
-import { CheckExpiredSubscriptionJob } from './cron/jobs';
+import { CancelPendingInitialPaymentJob, CheckExpiredSubscriptionJob } from './cron/jobs';
 
 const app = express();
 
@@ -11,6 +11,7 @@ app.use(express.urlencoded({ extended: true }))
 
 app.use(router)
 CheckExpiredSubscriptionJob()
+CancelPendingInitialPaymentJob()
 
 app.use(errorHandler)
 

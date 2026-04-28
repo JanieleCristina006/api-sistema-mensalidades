@@ -25,9 +25,6 @@ class ConfirmSubscriptionPaymentService {
       throw new Error("Assinatura cancelada não pode receber pagamento!");
     }
 
-    //const referencia_mes = existSignature.proximo_vencimento.getMonth() + 1;
-    //const referencia_ano = existSignature.proximo_vencimento.getFullYear();
-
  
     const existPayment = await prisma.pagamento.findFirst({
       where: {

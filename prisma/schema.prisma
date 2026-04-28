@@ -14,6 +14,7 @@ enum PlanStatus {
 
 enum SignatureStatus {
   ACTIVE
+  PENDING
   CANCELLED
   OVERDUE
 }
@@ -67,7 +68,7 @@ model Assinatura {
   client                Cliente           @relation(fields: [client_id], references: [id])
   plano_id              Int
   plano                 Plano            @relation(fields: [plano_id], references: [id])
-  status                SignatureStatus  @default(ACTIVE)
+  status                SignatureStatus  @default(PENDING)
   data_inicio           DateTime         @default(now())
   data_ultimo_pagamento DateTime?
   proximo_vencimento    DateTime

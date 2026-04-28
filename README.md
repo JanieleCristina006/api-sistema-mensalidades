@@ -1,6 +1,6 @@
 # Sistema de Mensalidades
 
-API backend em Node.js para gerenciamento de clientes, planos, assinaturas e pagamentos recorrentes. O projeto usa Express, TypeScript, Prisma e PostgreSQL, com validacao de entrada via Zod e um job em `node-cron` para marcar assinaturas vencidas.
+API backend em Node.js para gerenciamento de clientes, planos, assinaturas, pagamentos e administradores. O projeto usa Express, TypeScript, Prisma, PostgreSQL, Zod, Supabase Storage para imagens e jobs com `node-cron`.
 
 ## Stack
 
@@ -10,25 +10,32 @@ API backend em Node.js para gerenciamento de clientes, planos, assinaturas e pag
 - Prisma ORM
 - PostgreSQL
 - Zod
-- node-cron
+- Multer
+- Supabase Storage
+- JWT
+- bcrypt
 - nodemailer
+- node-cron
 - date-fns
 
-## Funcionalidades atuais
+## Funcionalidades
 
+- Cadastro, login e avatar de administradores
 - Cadastro, listagem, busca, atualizacao e exclusao de clientes
 - Cadastro, listagem, atualizacao e alteracao de status de planos
-- Criacao automatica de assinatura ao cadastrar um cliente
-- Listagem e consulta de assinaturas
-- Cancelamento manual de assinatura
-- Confirmacao de pagamento de assinatura
-- Verificacao manual e automatica de assinaturas vencidas
+- Upload de banner para planos
+- Criacao automatica de assinatura e pagamento pendente ao cadastrar cliente
+- Criacao manual de novas assinaturas para um cliente existente
+- Listagem, consulta e cancelamento de assinaturas
+- Confirmacao de pagamentos pendentes
+- Verificacao automatica de assinaturas vencidas
+- Cancelamento automatico de assinaturas iniciais com pagamento pendente apos 1 dia
 
-## Estrutura do projeto
+## Estrutura
 
 ```text
 src/
-  config/        # configuracao do Prisma
+  config/        # Prisma, Supabase, Multer e email
   controller/    # controllers HTTP
   cron/          # jobs agendados
   middleware/    # validacao e tratamento de erro
@@ -44,7 +51,8 @@ prisma/
 
 - Node.js 18 ou superior
 - PostgreSQL disponivel
-- Variavel de ambiente `DATABASE_URL` configurada
+- Projeto/bucket no Supabase para upload de imagens
+- Conta Gmail ou credenciais SMTP compativeis com a configuracao atual
 
 ## Instalacao
 
@@ -52,19 +60,29 @@ prisma/
 npm install
 ```
 
-## Ambiente
+## Variaveis de ambiente
 
 Crie um arquivo `.env` na raiz do projeto:
 
 ```env
 DATABASE_URL="postgresql://usuario:senha@host:5432/sistema_mensalidades"
+
+JWT_SECRET="sua-chave-jwt"
+
+SUPABASE_URL="https://seu-projeto.supabase.co"
+SUPABASE_SERVICE_ROLE_KEY="sua-service-role-key"
+SUPABASE_BUCKET="bucket-para-avatar-admin"
+SUPABASE_BUCKET_PLANO="bucket-para-banner-plano"
+
 EMAIL_USER="seu-email@gmail.com"
 EMAIL_PASS="sua-senha-ou-app-password"
 ```
 
-O projeto instancia o Prisma em [src/config/prisma.ts](c:\Users\janie\Desktop\projetos_backend\sistema_mensalidades\src\config\prisma.ts) usando `@prisma/adapter-pg`, entao a aplicacao falha ao iniciar se `DATABASE_URL` nao estiver definida.
+Observacoes:
 
-Para envio de e-mails, o transporter em [src/config/mail.ts](c:\Users\janie\Desktop\projetos_backend\sistema_mensalidades\src\config\mail.ts) usa Gmail via `nodemailer`, com `EMAIL_USER` e `EMAIL_PASS`.
+- O Prisma e configurado em `src/config/prisma.ts` com `@prisma/adapter-pg`.
+- Uploads usam `multer` em memoria, com limite de 5 MB e apenas arquivos `image/*`.
+- O envio de email usa Gmail via `nodemailer` em `src/config/mail.ts`.
 
 ## Banco de dados
 
@@ -86,7 +104,7 @@ Criar e aplicar migration em desenvolvimento:
 npm run prisma:migrate
 ```
 
-## Executando a API
+## Executando
 
 ```bash
 npm run dev
@@ -98,23 +116,29 @@ Servidor padrao:
 http://localhost:3000
 ```
 
-A porta esta fixa em [src/server.ts](c:\Users\janie\Desktop\projetos_backend\sistema_mensalidades\src\server.ts).
+A porta esta fixa em `src/server.ts`.
 
-## Regras de negocio importantes
+## Scripts
 
-- Ao criar um cliente, a API tambem cria uma assinatura automaticamente com o `plano_id` informado.
-- O plano escolhido no cadastro do cliente precisa existir e estar com status `ACTIVE`.
-- O primeiro vencimento da assinatura e definido para 30 dias apos o cadastro.
-- Ao confirmar um pagamento, a API registra um pagamento com status `PAID` e avanca o `proximo_vencimento` em 1 mes.
-- A API impede pagamento duplicado para a mesma assinatura no mesmo mes/ano de referencia.
-- Assinaturas canceladas nao podem receber confirmacao de pagamento.
-- O job de vencimento agenda a verificacao diaria no horario configurado em `src/cron/jobs.ts`.
-- Assinaturas atrasadas sao alteradas de `ACTIVE` para `OVERDUE`.
-- Quando o atraso e multiplo de 3 dias, a aplicacao tenta enviar um e-mail real ao cliente.
+```bash
+npm run dev
+npm run prisma:generate
+npm run prisma:push
+npm run prisma:migrate
+```
 
-## Modelos do banco
+## Modelos principais
 
-### Client
+### Admin
+
+- `id`
+- `avatar`
+- `nome`
+- `email` unico
+- `senha`
+- `criado_em`
+
+### Cliente
 
 - `id`
 - `nome`
@@ -126,7 +150,9 @@ A porta esta fixa em [src/server.ts](c:\Users\janie\Desktop\projetos_backend\sis
 ### Plano
 
 - `id`
+- `banner`
 - `nome` unico
+- `descricao`
 - `preco`
 - `status`: `ACTIVE`, `INACTIVE`, `ARCHIVED`
 - `criado_em`
@@ -137,7 +163,7 @@ A porta esta fixa em [src/server.ts](c:\Users\janie\Desktop\projetos_backend\sis
 - `id`
 - `client_id`
 - `plano_id`
-- `status`: `ACTIVE`, `CANCELLED`, `OVERDUE`
+- `status`: `ACTIVE`, `PENDING`, `CANCELLED`, `OVERDUE`
 - `data_inicio`
 - `data_ultimo_pagamento`
 - `proximo_vencimento`
@@ -151,6 +177,7 @@ A porta esta fixa em [src/server.ts](c:\Users\janie\Desktop\projetos_backend\sis
 - `valor`
 - `status`: `PAID`, `PENDING`, `FAILED`, `REFUNDED`
 - `metodo`: `PIX`, `CREDIT_CARD`
+- `pago_em`
 - `referencia_mes`
 - `referencia_ano`
 - `obs`
@@ -158,15 +185,54 @@ A porta esta fixa em [src/server.ts](c:\Users\janie\Desktop\projetos_backend\sis
 
 Restricao importante:
 
-- Existe uma chave unica composta em `Pagamento` para `assinatura_id + referencia_mes + referencia_ano`.
+- `Pagamento` possui chave unica composta por `assinatura_id + referencia_mes + referencia_ano`.
 
 ## Endpoints
+
+### Admins
+
+#### `POST /admins`
+
+Cadastra um administrador, envia o avatar para o Supabase e retorna um token JWT.
+
+Formato: `multipart/form-data`
+
+Campos:
+
+- `avatar`: arquivo de imagem obrigatorio
+- `nome`: minimo de 3 caracteres
+- `email`: email valido
+- `senha`: minimo de 6 caracteres
+
+Exemplo de resposta:
+
+```json
+{
+  "message": "Admin cadastrado!",
+  "data": {
+    "token": "jwt"
+  }
+}
+```
+
+#### `POST /admins/login`
+
+Autentica um administrador.
+
+Body:
+
+```json
+{
+  "email": "admin@email.com",
+  "senha": "123456"
+}
+```
 
 ### Clientes
 
 #### `POST /clientes`
 
-Cadastra um cliente e cria a primeira assinatura.
+Cadastra um cliente, cria uma assinatura `PENDING` e gera o primeiro pagamento `PENDING`.
 
 Body:
 
@@ -180,48 +246,41 @@ Body:
 }
 ```
 
-Validacoes:
+Regras:
 
-- `nome`: minimo de 3 caracteres
-- `email`: formato valido
-- `cpf`: exatamente 11 digitos
-- `telefone`: formato numerico valido
-- `plano_id`: numero maior que 0
-
-Resposta esperada:
-
-```json
-{
-  "message": "Cliente cadastrado!",
-  "data": {
-    "createdClient": {
-      "id": 1,
-      "nome": "Maria Silva",
-      "email": "maria@email.com",
-      "cpf": "12345678901",
-      "telefone": "11999998888"
-    },
-    "createdSubscription": {
-      "id": 1,
-      "client_id": 1,
-      "plano_id": 1,
-      "status": "ACTIVE"
-    }
-  }
-}
-```
+- O plano precisa existir e estar com status `ACTIVE`.
+- `email`, `cpf` e `telefone` nao podem estar cadastrados.
+- O primeiro vencimento e definido para 30 dias apos o cadastro.
 
 #### `GET /clientes`
 
-Lista clientes com suas assinaturas.
+Lista clientes.
 
 #### `GET /clientes/:id`
 
 Busca um cliente por ID.
 
+#### `POST /clientes/:id/assinaturas`
+
+Cria uma nova assinatura para um cliente existente e gera o primeiro pagamento pendente.
+
+Body:
+
+```json
+{
+  "id_plano": 1
+}
+```
+
+Regras:
+
+- `:id` deve ser um numero inteiro positivo.
+- `id_plano` deve ser um numero inteiro positivo.
+- O plano precisa existir e estar `ACTIVE`.
+
 #### `PUT /clientes/:id`
 
-Atualiza `nome`, `email`, `cpf` e `telefone`.
+Atualiza dados do cliente.
 
 Body:
 
@@ -238,30 +297,26 @@ Body:
 
 Remove um cliente pelo ID.
 
-Observacao:
-
-- O servico atual usa `deleteMany`, entao a resposta de sucesso nao retorna o cliente excluido, apenas a mensagem do controller.
-
 ### Planos
 
 #### `POST /planos`
 
-Cria um plano.
+Cria um plano e envia o banner para o Supabase.
 
-Body:
+Formato: `multipart/form-data`
 
-```json
-{
-  "nome": "Premium",
-  "preco": "99.90",
-  "status": "ACTIVE"
-}
-```
+Campos:
+
+- `banner`: arquivo de imagem obrigatorio
+- `nome`: minimo de 3 e maximo de 100 caracteres
+- `descricao`: minimo de 3 e maximo de 500 caracteres
+- `preco`: string numerica, como `"99.90"`
+- `status`: opcional, `ACTIVE`, `INACTIVE` ou `ARCHIVED`
 
 Observacoes:
 
-- `nome` e normalizado para minusculas antes de salvar.
-- `status` e opcional. Quando omitido, o padrao e `ACTIVE`.
+- `nome` e salvo em minusculas.
+- Quando `status` nao e enviado, o padrao e `ACTIVE`.
 
 #### `GET /planos`
 
@@ -280,13 +335,9 @@ Body:
 }
 ```
 
-Observacao:
-
-- Essa rota nao possui validacao de body via Zod no estado atual do projeto.
-
 #### `PATCH /planos/:id/status`
 
-Atualiza apenas o status do plano.
+Atualiza o status do plano.
 
 Body:
 
@@ -295,12 +346,6 @@ Body:
   "status": "INACTIVE"
 }
 ```
-
-Valores aceitos:
-
-- `ACTIVE`
-- `INACTIVE`
-- `ARCHIVED`
 
 ### Assinaturas
 
@@ -316,20 +361,9 @@ Busca uma assinatura por ID.
 
 Cancela uma assinatura, alterando o status para `CANCELLED`.
 
-#### `POST /assinaturas/verificar-vencidas`
-
-Executa manualmente a verificacao de assinaturas vencidas.
-
-Observacoes:
-
-- O servico procura assinaturas `ACTIVE` com `proximo_vencimento` menor que a data atual.
-- Assinaturas encontradas sao atualizadas para `OVERDUE`.
-- Se o atraso for multiplo de 3 dias, o servico tenta enviar um e-mail com o assunto `Sua assinatura venceu`.
-- Hoje o controller retorna `message`, mas o campo `data` tende a vir `null`/`undefined`, porque o servico nao devolve explicitamente o resultado.
-
 #### `PATCH /assinaturas/:id/confirmar-pagamento`
 
-Registra o pagamento de uma assinatura.
+Confirma um pagamento pendente da assinatura.
 
 Body:
 
@@ -340,33 +374,57 @@ Body:
 }
 ```
 
-Valores aceitos para `metodo`:
+Regras:
 
-- `PIX`
-- `CREDIT_CARD`
+- A assinatura precisa existir.
+- Assinaturas `CANCELLED` nao recebem pagamento.
+- Precisa existir um pagamento `PENDING` para a assinatura.
+- O pagamento vira `PAID`, recebe `pago_em`, e a assinatura vira `ACTIVE`.
+- `proximo_vencimento` e atualizado para 1 mes apos a confirmacao.
 
-Observacao:
+## Jobs agendados
 
-- Embora o controller leia `valor` do body, o servico usa o preco do plano vinculado a assinatura para criar o pagamento.
+Os jobs sao iniciados em `src/server.ts` junto com a API.
 
-## Job agendado
+### Verificacao de assinaturas vencidas
 
-O arquivo [src/cron/jobs.ts](c:\Users\janie\Desktop\projetos_backend\sistema_mensalidades\src\cron\jobs.ts) agenda a verificacao de vencimento com a expressao:
+Arquivo: `src/cron/jobs.ts`
+
+Expressao:
 
 ```ts
-"27 11 * * *"
+"07 15 * * *"
 ```
 
-Na pratica, isso significa:
+Executa todos os dias as 15:07 no timezone `America/Sao_Paulo`.
 
-- execucao diaria as 11:27
-- disparo automatico no boot da aplicacao
-- timezone `America/Sao_Paulo`
-- log no console com timestamp ISO no momento da execucao
+Comportamento:
 
-## Padrao de erro atual
+- Busca assinaturas `ACTIVE` com `proximo_vencimento` anterior a data atual.
+- Envia email a cada multiplo de 3 dias de atraso.
+- Atualiza as assinaturas encontradas para `OVERDUE`.
 
-O middleware global em [src/middleware/error.ts](c:\Users\janie\Desktop\projetos_backend\sistema_mensalidades\src\middleware\error.ts) responde com status `400` para erros lancados pela aplicacao:
+### Cancelamento de pagamento inicial pendente
+
+Expressao:
+
+```ts
+"0 0 * * *"
+```
+
+Executa todos os dias a meia-noite no timezone `America/Sao_Paulo`.
+
+Comportamento:
+
+- Busca assinaturas `PENDING` criadas ha pelo menos 1 dia com pagamento `PENDING`.
+- Atualiza pagamentos pendentes para `FAILED`.
+- Atualiza a assinatura para `CANCELLED`.
+
+## Validacao e erros
+
+- Validacoes de body e params usam Zod em `src/schemas`.
+- Erros de validacao retornam status `400` com `details`.
+- O middleware global em `src/middleware/error.ts` retorna status `400` com:
 
 ```json
 {
@@ -374,22 +432,10 @@ O middleware global em [src/middleware/error.ts](c:\Users\janie\Desktop\projetos
 }
 ```
 
-Nao ha, no estado atual, uma diferenciacao entre erros de validacao, regra de negocio e recursos nao encontrados.
-
-## Scripts disponiveis
-
-```bash
-npm run dev
-npm run prisma:generate
-npm run prisma:push
-npm run prisma:migrate
-```
-
 ## Observacoes do estado atual
 
 - O projeto ainda nao possui testes automatizados.
 - Nao existe `.env.example`.
 - A API nao possui rota de health check.
-- O envio de email depende de credenciais Gmail configuradas no `.env`.
-- Alguns textos de erro retornados pelo codigo apresentam problemas de codificacao.
-- O README foi atualizado com base no comportamento implementado hoje, nao em um contrato futuro.
+- Algumas mensagens no codigo ainda apresentam problemas de codificacao.
+- A rota `POST /clientes/:id/assinaturas` retorna apenas mensagem de sucesso no controller atual.

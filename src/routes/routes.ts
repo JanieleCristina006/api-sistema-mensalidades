@@ -29,6 +29,8 @@ import { LoginController } from "../controller/Admin/LoginController";
 import { createAdminSchema } from "../schemas/Admin/createAdminSchema";
 import { loginAdminSchema } from "../schemas/Admin/loginAdminSchema";
 import { upload } from "../config/multer";
+import { CreateSubscriptionController } from "../controller/Assinatura/CreateSubscriptionController";
+import { createSubscriptionSchema } from "../schemas/Assinaturas/createSubscriptionSchema";
 
 const router = Router();
 
@@ -63,6 +65,13 @@ router.get(
   validateParams(idSchema),
   new GetClientByIdController().handle
 );
+
+router.post(
+  "/clientes/:id/assinaturas",
+  validateParams(idSchema),
+  validateBody(createSubscriptionSchema),
+  new CreateSubscriptionController().handle
+)
 
 router.put(
   "/clientes/:id",
@@ -114,6 +123,7 @@ router.get(
   validateParams(idSchema),
   new GetSignatureByIdController().handle
 )
+
 
 router.post(
   "/assinaturas/:id",
