@@ -62,7 +62,13 @@ npm install
 
 ## Variaveis de ambiente
 
-Crie um arquivo `.env` na raiz do projeto:
+Copie o arquivo de exemplo e preencha os valores reais:
+
+```bash
+cp .env.example .env
+```
+
+O arquivo `.env.example` contem:
 
 ```env
 DATABASE_URL="postgresql://usuario:senha@host:5432/sistema_mensalidades"
@@ -435,7 +441,6 @@ Comportamento:
 ## Observacoes do estado atual
 
 - O projeto ainda nao possui testes automatizados.
-- Nao existe `.env.example`.
 - A API nao possui rota de health check.
 - Algumas mensagens no codigo ainda apresentam problemas de codificacao.
 - A rota `POST /clientes/:id/assinaturas` retorna apenas mensagem de sucesso no controller atual.
