@@ -17,6 +17,7 @@ import { validateParams } from "../middleware/validateParams";
 import { clientSchema } from "../schemas/Cliente/createClientSchema";
 import { updatedClientSchema } from "../schemas/Cliente/updateClientSchema";
 import { createPlanSchema } from "../schemas/Plano/createPlanSchema";
+import { updatePlanSchema } from "../schemas/Plano/updatePlanSchema";
 import { updatePlanStatusSchema } from "../schemas/Plano/updatePlanStatusSchema";
 import { idSchema } from "../schemas/Global/idSchema";
 import { ListSignatureController } from "../controller/Assinatura/listSignatureController";
@@ -24,13 +25,17 @@ import { GetSignatureByIdController } from "../controller/Assinatura/getSignatur
 import { CancelSubscriptionController } from "../controller/Assinatura/cancelSubscriptionController";
 import { CreateSubscriptionPaymentController } from "../controller/Pagamento/createSubscriptionPaymentController";
 import { createSubscriptionPaymentSchema } from "../schemas/Pagamento/createSubscriptionPaymentSchema";
-import { CreateAdminController } from "../controller/Admin/CreateAdminController";
-import { LoginController } from "../controller/Admin/LoginController";
+import { CreateAdminController } from "../controller/Admin/createAdminController";
+import { LoginController } from "../controller/Admin/loginController";
 import { createAdminSchema } from "../schemas/Admin/createAdminSchema";
 import { loginAdminSchema } from "../schemas/Admin/loginAdminSchema";
 import { upload } from "../config/multer";
-import { CreateSubscriptionController } from "../controller/Assinatura/CreateSubscriptionController";
+import { CreateSubscriptionController } from "../controller/Assinatura/createSubscriptionController";
 import { createSubscriptionSchema } from "../schemas/Assinaturas/createSubscriptionSchema";
+import { ForgotPasswordController } from "../controller/Admin/ResetPassword/forgotPasswordController";
+import { forgotPasswordSchema } from "../schemas/Admin/forgotPasswordSchema";
+import { ResetPasswordController } from "../controller/Admin/ResetPassword/resetPasswordController";
+import { resetPasswordSchema } from "../schemas/Admin/resetPasswordSchema";
 
 const router = Router();
 
@@ -46,6 +51,18 @@ router.post(
   "/admins/login",
   validateBody(loginAdminSchema),
   new LoginController().handle
+);
+
+router.post(
+  "/admins/recuperar-senha",
+  validateBody(forgotPasswordSchema),
+  new ForgotPasswordController().handle
+);
+
+router.post(
+  "/admins/redefinir-senha",
+  validateBody(resetPasswordSchema),
+  new ResetPasswordController().handle
 );
 
 // Clientes
@@ -102,6 +119,7 @@ router.get(
 router.put(
   "/planos/:id",
   validateParams(idSchema),
+  validateBody(updatePlanSchema),
   new UpdatePlanController().handle
 );
 

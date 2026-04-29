@@ -7,10 +7,6 @@ export class ListClientsController {
 
     const clientList = await listClientsService.execute();
 
-    if (!clientList) {
-      throw new Error("Erro ao buscar lista de clientes");
-    }
-
     res.status(200).json(clientList);
   }
 }

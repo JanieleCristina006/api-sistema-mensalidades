@@ -7,10 +7,6 @@ export class ListSignatureController {
 
     const subscriptionList = await listSignatureService.execute();
 
-    if (!subscriptionList) {
-      throw new Error("Erro ao buscar assinaturas");
-    }
-
     res.status(200).json(subscriptionList);
   }
 }

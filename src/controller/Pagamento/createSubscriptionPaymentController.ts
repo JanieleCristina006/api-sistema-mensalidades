@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { ConfirmSubscriptionPaymentService } from "../../services/Pagamento/CreateSubscriptionPaymentService";
+import { ConfirmSubscriptionPaymentService } from "../../services/Pagamento/createSubscriptionPaymentService";
 
 export class CreateSubscriptionPaymentController {
   async handle(req: Request, res: Response) {

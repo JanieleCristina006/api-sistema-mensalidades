@@ -15,10 +15,6 @@ export class CreateClientController {
       plano_id,
     });
 
-    if (!createdClientSubscription) {
-      throw new Error("Cliente não cadastrado!");
-    }
-
     res.status(201).json({
       message: "Cliente cadastrado!",
       data: createdClientSubscription,

@@ -7,10 +7,6 @@ export class ListPlanController {
 
     const planList = await listPlanService.execute();
 
-    if (!planList) {
-      throw new Error("Nenhum plano encontrado");
-    }
-
     res.status(200).json(planList);
   }
 }

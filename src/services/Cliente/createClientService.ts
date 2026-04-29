@@ -1,6 +1,7 @@
 import { prisma } from "../../config/prisma";
 import { addDays } from "date-fns";
 import { PlanStatus, PaymentStatus } from "@prisma/client";
+import { AppError } from "../../errors/appError";
 
 interface CreateClientSubscriptionProps {
   email: string;
@@ -39,19 +40,23 @@ export class CreateClientService {
     });
 
     if (!existingPlan) {
-      throw new Error("Plano não cadastrado ou inativo/ARCHIVED");
+      throw new AppError(
+        "Plano não encontrado ou está inativo/arquivado.",
+        404,
+        "PLANO_INDISPONIVEL"
+      );
     }
 
     if (existingCpf) {
-      throw new Error("CPF já cadastrado!");
+      throw new AppError("CPF já cadastrado.", 409, "CPF_DUPLICADO");
     }
 
     if (existingEmail) {
-      throw new Error("Email já cadastrado!");
+      throw new AppError("Email já cadastrado.", 409, "EMAIL_DUPLICADO");
     }
 
     if (existingPhone) {
-      throw new Error("Telefone já cadastrado!");
+      throw new AppError("Telefone já cadastrado.", 409, "TELEFONE_DUPLICADO");
     }
 
     const result = await prisma.$transaction(async (tx) => {

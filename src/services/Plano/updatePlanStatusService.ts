@@ -1,4 +1,5 @@
 import { PlanStatus } from "@prisma/client";
+import { AppError } from "../../errors/appError";
 import { prisma } from "../../config/prisma";
 
 interface UpdateStatusPlanProps {
@@ -15,7 +16,7 @@ export class UpdatePlanStatusService {
     });
 
     if (!existingPlan) {
-      throw new Error("Plano nÃ£o encontrado!");
+      throw new AppError("Plano não encontrado.", 404, "PLANO_NAO_ENCONTRADO");
     }
 
     const updatedPlanStatus = await prisma.plano.update({

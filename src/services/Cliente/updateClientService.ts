@@ -1,3 +1,4 @@
+import { AppError } from "../../errors/appError";
 import { prisma } from "../../config/prisma";
 
 interface UpdateClientProps {
@@ -10,8 +11,14 @@ interface UpdateClientProps {
 
 export class UpdateClientService {
   async execute({ id, nome, email, cpf, telefone }: UpdateClientProps) {
-    if (!id) {
-      throw new Error("Usuário não encontrado!");
+    const existingClient = await prisma.cliente.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!existingClient) {
+      throw new AppError("Cliente não encontrado.", 404, "CLIENTE_NAO_ENCONTRADO");
     }
 
     const updatedClient = await prisma.cliente.update({

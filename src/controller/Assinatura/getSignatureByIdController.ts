@@ -9,10 +9,6 @@ export class GetSignatureByIdController {
 
     const subscription = await getSignatureByIdService.execute(id);
 
-    if (!subscription) {
-      throw new Error("Assinatura não encontrada!");
-    }
-
     return res.status(200).json(subscription);
   }
 }

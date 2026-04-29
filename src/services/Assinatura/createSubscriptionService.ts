@@ -1,4 +1,5 @@
 import { PaymentMethod, PaymentStatus } from "@prisma/client";
+import { AppError } from "../../errors/appError";
 import { prisma } from "../../config/prisma";
 import { addMonths } from "date-fns";
 
@@ -16,7 +17,7 @@ export class CreateSubscriptionService {
     });
 
     if (!existClient) {
-      throw new Error("Cliente não encontrado!");
+      throw new AppError("Cliente não encontrado.", 404, "CLIENTE_NAO_ENCONTRADO");
     }
 
     const existPlan = await prisma.plano.findFirst({
@@ -27,7 +28,11 @@ export class CreateSubscriptionService {
     });
 
     if (!existPlan) {
-      throw new Error("Plano não encontrado ou não está ativo!");
+      throw new AppError(
+        "Plano não encontrado ou não está ativo.",
+        404,
+        "PLANO_INDISPONIVEL"
+      );
     }
 
     const createSignature = await prisma.$transaction(async (tx) => {

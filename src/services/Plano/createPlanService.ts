@@ -1,4 +1,5 @@
 import { PlanStatus } from "@prisma/client";
+import { AppError } from "../../errors/appError";
 import { prisma } from "../../config/prisma";
 import { supabase } from "../../config/supabase";
 
@@ -17,13 +18,17 @@ interface UploadImageProps {
 class CreatePlanService {
   async uploadImagem({ file }: UploadImageProps) {
     if (!file) {
-      throw new Error("Arquivo nao enviado!");
+      throw new AppError("Arquivo do banner não enviado.", 400, "BANNER_OBRIGATORIO");
     }
 
     const bucket = process.env.SUPABASE_BUCKET_PLANO;
 
     if (!bucket) {
-      throw new Error("SUPABASE_BUCKET_PLANO nao definido");
+      throw new AppError(
+        "SUPABASE_BUCKET_PLANO não definido no ambiente.",
+        500,
+        "CONFIGURACAO_AUSENTE"
+      );
     }
 
     const fileName = `plano-banner-${Date.now()}-${file.originalname}`;
@@ -35,7 +40,11 @@ class CreatePlanService {
       });
 
     if (error) {
-      throw new Error(error.message);
+      throw new AppError(
+        `Falha ao enviar banner para o Supabase: ${error.message}`,
+        502,
+        "UPLOAD_SUPABASE_FALHOU"
+      );
     }
 
     const { data: publicUrl } = supabase.storage
@@ -63,7 +72,7 @@ class CreatePlanService {
     });
 
     if (existingPlan) {
-      throw new Error("O plano ja existe!");
+      throw new AppError("Já existe um plano com esse nome.", 409, "PLANO_DUPLICADO");
     }
 
     const uploadBanner = await this.uploadImagem({ file });

@@ -1,6 +1,7 @@
 import { prisma } from "../../config/prisma";
 import { PaymentMethod, PaymentStatus, SignatureStatus } from "@prisma/client";
 import { addMonths } from "date-fns";
+import { AppError } from "../../errors/appError";
 
 interface ConfirmSubscriptionPaymentProps {
   id_assinatura: number;
@@ -18,11 +19,19 @@ class ConfirmSubscriptionPaymentService {
     });
 
     if (!existSignature) {
-      throw new Error("Assinatura não encontrada!");
+      throw new AppError(
+        "Assinatura não encontrada.",
+        404,
+        "ASSINATURA_NAO_ENCONTRADA"
+      );
     }
 
     if (existSignature.status === SignatureStatus.CANCELLED) {
-      throw new Error("Assinatura cancelada não pode receber pagamento!");
+      throw new AppError(
+        "Assinatura cancelada não pode receber pagamento.",
+        409,
+        "ASSINATURA_CANCELADA"
+      );
     }
 
  
@@ -34,7 +43,11 @@ class ConfirmSubscriptionPaymentService {
     });
 
     if (!existPayment) {
-      throw new Error("Nenhum pagamento pendente encontrado para esse ciclo!");
+      throw new AppError(
+        "Nenhum pagamento pendente encontrado para essa assinatura.",
+        404,
+        "PAGAMENTO_PENDENTE_NAO_ENCONTRADO"
+      );
     }
 
     const result = await prisma.$transaction(async (tx) => {

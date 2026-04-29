@@ -7,11 +7,7 @@ export class DeleteClientController {
 
     const deleteClientService = new DeleteClientService();
 
-    const deletedClient = await deleteClientService.execute(id);
-
-    if (!deletedClient) {
-      throw new Error("Cliente nÃ£o encontrado");
-    }
+    await deleteClientService.execute(id);
 
     return res.status(200).json({
       message: "Cliente excluído com sucesso!",

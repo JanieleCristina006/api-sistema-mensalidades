@@ -1,4 +1,5 @@
 import multer from "multer";
+import { AppError } from "../errors/appError";
 
 export const upload = multer({
   storage: multer.memoryStorage(),
@@ -9,7 +10,13 @@ export const upload = multer({
     if (file.mimetype.startsWith("image/")) {
       cb(null, true);
     } else {
-      cb(new Error("So e permitido imagem!"));
+      cb(
+        new AppError(
+          "Só é permitido enviar arquivos de imagem.",
+          400,
+          "TIPO_ARQUIVO_INVALIDO"
+        )
+      );
     }
   },
 });

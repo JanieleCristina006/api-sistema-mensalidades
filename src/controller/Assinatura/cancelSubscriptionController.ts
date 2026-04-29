@@ -9,10 +9,6 @@ export class CancelSubscriptionController {
 
     const cancelledSubscription = await cancelSubscriptionService.execute(subscriptionId);
 
-    if (!cancelledSubscription) {
-      throw new Error("Assinatura cancelada!");
-    }
-
     return res.status(200).json(cancelledSubscription);
   }
 }

@@ -1,6 +1,6 @@
 import { SignatureStatus } from "@prisma/client";
 import { prisma } from "../../config/prisma";
-import { SendEmailService } from "./SendEmailService";
+import { SendEmailService } from "./sendEmailService";
 
 export class CheckExpiredSubscription {
   emailService = new SendEmailService();
@@ -63,6 +63,6 @@ Equipe`;
       return expiradas;
     });
 
-    console.log(searchSubscriptions);
+    console.log(`[CRON] Assinaturas vencidas atualizadas: ${searchSubscriptions.length}`);
   }
 }

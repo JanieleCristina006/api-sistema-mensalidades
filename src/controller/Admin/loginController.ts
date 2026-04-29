@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { LoginService } from "../../services/Admin/LoginService";
+import { LoginService } from "../../services/Admin/loginService";
 
 export class LoginController {
   async handle(req: Request, res: Response) {
@@ -11,10 +11,6 @@ export class LoginController {
       email,
       senha,
     });
-
-    if (!loginAdmin) {
-      throw new Error("Falha ao realizar login!");
-    }
 
     res.status(200).json({
       message: "Login realizado com sucesso!",

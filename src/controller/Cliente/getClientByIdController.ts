@@ -9,10 +9,6 @@ export class GetClientByIdController {
 
     const client = await getClientByIdService.execute(id);
 
-    if (!client) {
-      throw new Error("Cliente não encontrado!");
-    }
-
     return res.status(200).json(client);
   }
 }
