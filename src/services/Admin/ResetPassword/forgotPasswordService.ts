@@ -18,11 +18,11 @@ export class ForgotPasswordService {
       };
     }
 
-    const secretKey = process.env.JWT_SECRET;
+    const secretKey = process.env.JWT_RESET_SECRET;
 
     if (!secretKey) {
       throw new AppError(
-        "JWT_SECRET não definido no ambiente.",
+        "JWT_RESET_SECRET não definido no ambiente.",
         500,
         "CONFIGURACAO_AUSENTE"
       );

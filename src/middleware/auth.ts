@@ -3,12 +3,25 @@ import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { AppError } from "../errors/appError";
 
+const publicRoutes = [
+  { method: "POST", path: "/admins" },
+  { method: "POST", path: "/admins/login" },
+  { method: "POST", path: "/admins/recuperar-senha" },
+  { method: "POST", path: "/admins/redefinir-senha" },
+];
+
+function isPublicRoute(method: string, path: string) {
+  return publicRoutes.some(
+    (route) => route.method === method && route.path === path
+  );
+}
+
 export function authMiddleware(
   req: Request,
   _res: Response,
   next: NextFunction
 ) {
-  if (req.method === "GET") {
+  if (req.method === "OPTIONS" || isPublicRoute(req.method, req.path)) {
     return next();
   }
 

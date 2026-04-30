@@ -11,11 +11,11 @@ interface ResetPasswordProps {
 
 export class ResetPasswordService {
   async execute({ token, novaSenha }: ResetPasswordProps) {
-    const secretKey = process.env.JWT_SECRET;
+    const secretKey = process.env.JWT_RESET_SECRET;
 
     if (!secretKey) {
       throw new AppError(
-        "JWT_SECRET não definido no ambiente.",
+        "JWT_RESET_SECRET não definido no ambiente.",
         500,
         "CONFIGURACAO_AUSENTE"
       );
@@ -24,7 +24,17 @@ export class ResetPasswordService {
     let decoded: { id: number };
 
     try {
-      decoded = jwt.verify(token, secretKey) as { id: number };
+      const payload = jwt.verify(token, secretKey);
+
+      if (
+        typeof payload !== "object" ||
+        payload === null ||
+        typeof payload.id !== "number"
+      ) {
+        throw new AppError("Token inválido ou expirado.", 401, "TOKEN_INVALIDO");
+      }
+
+      decoded = { id: payload.id };
     } catch {
       throw new AppError("Token inválido ou expirado.", 401, "TOKEN_INVALIDO");
     }

@@ -83,6 +83,7 @@ Variaveis usadas pela aplicacao:
 DATABASE_URL="postgresql://usuario:senha@host:5432/sistema_mensalidades"
 
 JWT_SECRET="sua-chave-jwt"
+JWT_RESET_SECRET="sua-chave-jwt-para-recuperacao-de-senha"
 
 SUPABASE_URL="https://seu-projeto.supabase.co"
 SUPABASE_SERVICE_ROLE_KEY="sua-service-role-key"
@@ -97,7 +98,8 @@ EMAIL_FROM="Sistema de Mensalidades <noreply@seudominio.com>"
 Observacoes:
 
 - `DATABASE_URL` e obrigatoria para iniciar o Prisma.
-- `JWT_SECRET` tambem e usado nos tokens de recuperacao de senha.
+- `JWT_SECRET` assina os tokens de sessao.
+- `JWT_RESET_SECRET` assina apenas os tokens de recuperacao de senha.
 - `EMAIL_FROM` e opcional; quando nao informado, o envio usa `EMAIL_USER`.
 - Uploads usam `multer` em memoria, limite de 5 MB e apenas arquivos `image/*`.
 
@@ -137,9 +139,14 @@ A porta esta fixa em `src/server.ts`.
 
 ## Autenticacao
 
-O middleware `src/middleware/auth.ts` libera apenas requisicoes `GET` sem token.
+O middleware `src/middleware/auth.ts` libera sem token apenas:
 
-Todos os outros metodos exigem o header:
+- `POST /admins`
+- `POST /admins/login`
+- `POST /admins/recuperar-senha`
+- `POST /admins/redefinir-senha`
+
+Todas as outras rotas exigem o header:
 
 ```http
 Authorization: Bearer seu-token-jwt
@@ -345,7 +352,8 @@ Regras:
 - Assinaturas `CANCELLED` nao recebem pagamento.
 - Precisa existir um pagamento `PENDING` para a assinatura.
 - O pagamento vira `PAID`, recebe `pago_em`, e a assinatura vira `ACTIVE`.
-- `proximo_vencimento` e atualizado para 1 mes apos a confirmacao.
+- `proximo_vencimento` avanca conforme o ciclo da assinatura.
+- Um novo pagamento `PENDING` e gerado automaticamente para a proxima referencia mensal.
 
 ## Modelos principais
 

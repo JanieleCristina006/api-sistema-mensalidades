@@ -10,7 +10,7 @@ export function CheckExpiredSubscriptionJob() {
   const service = new CheckExpiredSubscription();
 
   cron.schedule(
-    "07 15 * * *",
+    "0 15 * * *",
     async () => {
       console.log(`[CRON] Verificando assinaturas vencidas em ${new Date().toISOString()}`);
 
