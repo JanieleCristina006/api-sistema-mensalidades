@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { AppError } from "../errors/appError";
 
 const publicRoutes = [
+  { method: "GET", path: "/teste" },
   { method: "POST", path: "/admins" },
   { method: "POST", path: "/admins/login" },
   { method: "POST", path: "/admins/recuperar-senha" },

@@ -39,6 +39,13 @@ import { resetPasswordSchema } from "../schemas/Admin/resetPasswordSchema";
 
 const router = Router();
 
+router.get("/teste", (_req, res) => {
+  return res.status(200).json({
+    status: "ok",
+    message: "API funcionando corretamente.",
+  });
+});
+
 // Admins
 router.post(
   "/admins",
