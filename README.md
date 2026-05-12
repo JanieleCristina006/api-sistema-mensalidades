@@ -485,8 +485,3 @@ O middleware global em `src/middleware/error.ts` tambem trata:
 - Erros conhecidos do Prisma, como registro duplicado e registro nao encontrado
 - Erros inesperados com status `500` e codigo `ERRO_NAO_MAPEADO`
 
-## Observacoes
-
-- O projeto ainda nao possui testes automatizados.
-- A API nao possui rota de health check.
-- Nao existe script `build` no `package.json`; use `tsc --noEmit` para checagem de tipos.
