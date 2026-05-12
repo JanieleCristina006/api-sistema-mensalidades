@@ -4,9 +4,12 @@ import router from './routes/routes';
 import { authMiddleware } from './middleware/auth';
 import { errorHandler } from './middleware/error';
 import { CancelPendingInitialPaymentJob, CheckExpiredSubscriptionJob } from './cron/jobs';
+import cors from "cors";
 
 const app = express();
 
+
+app.use(cors());
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
