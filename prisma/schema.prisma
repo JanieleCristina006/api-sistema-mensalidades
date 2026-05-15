@@ -31,12 +31,20 @@ enum PaymentMethod {
   CREDIT_CARD
 }
 
+
+enum ClienteStatus {
+  ACTIVE
+  INACTIVE
+}
+
+
 model Cliente {
   id          Int           @id @default(autoincrement())
   email       String        @unique
   nome        String
   criado_em   DateTime      @default(now())
   cpf         String        @unique
+  status      ClienteStatus @default(ACTIVE)
   telefone    String        @unique
   assinaturas Assinatura[]
 }

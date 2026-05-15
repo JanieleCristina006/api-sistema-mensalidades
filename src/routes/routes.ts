@@ -4,7 +4,7 @@ import { CreateClientController } from "../controller/Cliente/createClientContro
 import { ListClientsController } from "../controller/Cliente/listClientsController";
 import { GetClientByIdController } from "../controller/Cliente/getClientByIdController";
 import { UpdateClientController } from "../controller/Cliente/updateClientController";
-import { DeleteClientController } from "../controller/Cliente/deleteClientController";
+import { DeactivateClientController } from "../controller/Cliente/desactivateClientController ";
 
 import { CreatePlanController } from "../controller/Plano/createPlanController";
 import { ListPlanController } from "../controller/Plano/listPlanController";
@@ -104,10 +104,10 @@ router.put(
   new UpdateClientController().handle
 );
 
-router.delete(
-  "/clientes/:id",
+router.patch(
+  "/clientes/:id/desativar",
   validateParams(idSchema),
-  new DeleteClientController().handle
+  new DeactivateClientController().handle
 );
 
 // Planos
