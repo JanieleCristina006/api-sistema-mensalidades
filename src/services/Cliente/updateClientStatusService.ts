@@ -1,8 +1,9 @@
 import { AppError } from "../../errors/appError";
 import { prisma } from "../../config/prisma";
+import { ClienteStatus } from "@prisma/client";
 
-export class DeactivateClientService {
-  async execute(id: number) {
+export class UpdateClientStatusService {
+  async execute(id: number, status: ClienteStatus) {
     const existingClient = await prisma.cliente.findUnique({
       where: { id },
     });
@@ -15,18 +16,18 @@ export class DeactivateClientService {
       );
     }
 
-    if (existingClient.status === "INACTIVE") {
+    if (existingClient.status === status) {
       throw new AppError(
-        "Cliente já está desativado.",
+        "O cliente já está com esse status.",
         400,
-        "CLIENTE_JA_INATIVO"
+        "STATUS_INALTERADO"
       );
     }
 
     return prisma.cliente.update({
       where: { id },
       data: {
-        status: "INACTIVE",
+        status,
       },
     });
   }

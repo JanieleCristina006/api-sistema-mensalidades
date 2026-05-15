@@ -1,17 +1,18 @@
 import { Request, Response } from "express";
-import { DeactivateClientService } from "../../services/Cliente/DeactivateClientService";
+import { UpdateClientStatusService } from "../../services/Cliente/updateClientStatusService";
+import { ClienteStatus } from "@prisma/client";
 
-
-export class DeactivateClientController {
+export class UpdateClientStatusController {
   async handle(req: Request, res: Response) {
     const id = Number(req.params.id);
+    const { status } = req.body as { status: ClienteStatus };
 
-    const deactivateClientService = new DeactivateClientService();
+    const updateClientStatusService = new UpdateClientStatusService();
 
-    await deactivateClientService.execute(id);
+    await updateClientStatusService.execute(id, status);
 
     return res.status(200).json({
-      message: "Cliente desativado com sucesso!",
+      message: `Cliente atualizado para ${status} com sucesso!`,
     });
   }
 }

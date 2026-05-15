@@ -4,7 +4,7 @@ import { CreateClientController } from "../controller/Cliente/createClientContro
 import { ListClientsController } from "../controller/Cliente/listClientsController";
 import { GetClientByIdController } from "../controller/Cliente/getClientByIdController";
 import { UpdateClientController } from "../controller/Cliente/updateClientController";
-import { DeactivateClientController } from "../controller/Cliente/desactivateClientController ";
+
 
 import { CreatePlanController } from "../controller/Plano/createPlanController";
 import { ListPlanController } from "../controller/Plano/listPlanController";
@@ -36,6 +36,7 @@ import { ForgotPasswordController } from "../controller/Admin/ResetPassword/forg
 import { forgotPasswordSchema } from "../schemas/Admin/forgotPasswordSchema";
 import { ResetPasswordController } from "../controller/Admin/ResetPassword/resetPasswordController";
 import { resetPasswordSchema } from "../schemas/Admin/resetPasswordSchema";
+import { UpdateClientStatusController } from "../controller/Cliente/desactivateClientController ";
 
 const router = Router();
 
@@ -105,9 +106,9 @@ router.put(
 );
 
 router.patch(
-  "/clientes/:id/desativar",
+  "/clientes/:id/status",
   validateParams(idSchema),
-  new DeactivateClientController().handle
+  new UpdateClientStatusController().handle
 );
 
 // Planos
